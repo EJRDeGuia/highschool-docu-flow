@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
@@ -536,7 +535,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="template-request-received">Request Received Template</Label>
                   <div className="text-xs text-gray-500">
-                    Available variables: {{"{{"}}student_name{{"}}"}}, {{"{{"}}document_type{{"}}"}}, {{"{{"}}request_id{{"}}"}}, {{"{{"}}school_name{{"}}"}}
+                    Available variables: {"{{student_name}}"}, {"{{document_type}}"}, {"{{request_id}}"}, {"{{school_name}}"}
                   </div>
                 </div>
                 <Textarea
@@ -551,7 +550,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="template-request-approved">Request Approved Template</Label>
                   <div className="text-xs text-gray-500">
-                    Available variables: {{"{{"}}student_name{{"}}"}}, {{"{{"}}document_type{{"}}"}}, {{"{{"}}request_id{{"}}"}}, {{"{{"}}school_name{{"}}"}}
+                    Available variables: {"{{student_name}}"}, {"{{document_type}}"}, {"{{request_id}}"}, {"{{school_name}}"}
                   </div>
                 </div>
                 <Textarea
@@ -566,7 +565,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="template-document-ready">Document Ready Template</Label>
                   <div className="text-xs text-gray-500">
-                    Available variables: {{"{{"}}student_name{{"}}"}}, {{"{{"}}document_type{{"}}"}}, {{"{{"}}request_id{{"}}"}}, {{"{{"}}school_name{{"}}"}}
+                    Available variables: {"{{student_name}}"}, {"{{document_type}}"}, {"{{request_id}}"}, {"{{school_name}}"}
                   </div>
                 </div>
                 <Textarea
@@ -580,7 +579,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="template-request-rejected">Request Rejected Template</Label>
                   <div className="text-xs text-gray-500">
-                    Available variables: {{"{{"}}student_name{{"}}"}}, {{"{{"}}document_type{{"}}"}}, {{"{{"}}request_id{{"}}"}}, {{"{{"}}rejection_reason{{"}}"}}, {{"{{"}}school_name{{"}}"}}
+                    Available variables: {"{{student_name}}"}, {"{{document_type}}"}, {"{{request_id}}"}, {"{{rejection_reason}}"}, {"{{school_name}}"}
                   </div>
                 </div>
                 <Textarea
