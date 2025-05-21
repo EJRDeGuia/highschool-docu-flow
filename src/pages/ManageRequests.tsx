@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotifications } from "../contexts/NotificationsContext";
@@ -14,6 +13,7 @@ import {
   X,
   Check,
   Clock,
+  AlertCircle
 } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { 
@@ -53,6 +53,9 @@ const ManageRequests = () => {
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<"approve" | "reject" | "complete" | null>(null);
   const [actionNote, setActionNote] = useState("");
+  
+  // Check if user can approve/reject requests (only registrars)
+  const canManageRequests = user?.role === 'registrar';
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -110,13 +113,23 @@ const ManageRequests = () => {
   };
 
   const handleActionClick = (type: "approve" | "reject" | "complete") => {
+    // Only registrars can perform these actions
+    if (!canManageRequests) {
+      toast({
+        title: "Access Denied",
+        description: "Only registrars can approve or reject requests.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setActionType(type);
     setActionNote("");
     setActionDialogOpen(true);
   };
 
   const handleActionConfirm = async () => {
-    if (!selectedRequest || !actionType) return;
+    if (!selectedRequest || !actionType || !canManageRequests) return;
     
     setIsUpdating(true);
     
@@ -201,8 +214,19 @@ const ManageRequests = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Manage Requests</h1>
         <p className="text-gray-600">
-          Review, approve, or reject student document requests
+          {canManageRequests 
+            ? "Review, approve, or reject student document requests" 
+            : "View and track student document requests"}
         </p>
+        
+        {!canManageRequests && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-md mt-4 flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            <span>
+              Note: Only registrars can approve or reject document requests. You are currently in view-only mode.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -246,14 +270,14 @@ const ManageRequests = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader className="w-8 h-8 animate-spin text-school-primary" />
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : filteredRequests.length > 0 ? (
         <div className="space-y-4">
           {filteredRequests.map((request) => (
             <Card 
               key={request.id} 
-              className="cursor-pointer hover:border-school-primary transition-colors"
+              className="cursor-pointer hover:border-blue-500 transition-colors"
               onClick={() => handleRequestSelect(request)}
             >
               <CardContent className="p-6">
@@ -409,8 +433,8 @@ const ManageRequests = () => {
                 </div>
                 
                 <div className="flex flex-wrap justify-end gap-3 mt-4">
-                  {/* Action buttons based on current status */}
-                  {selectedRequest.status === "Pending" && selectedRequest.hasPaid && (
+                  {/* Action buttons based on current status - only shown to registrars */}
+                  {canManageRequests && selectedRequest.status === "Pending" && selectedRequest.hasPaid && (
                     <>
                       <Button 
                         variant="outline" 
@@ -431,7 +455,7 @@ const ManageRequests = () => {
                     </>
                   )}
                   
-                  {selectedRequest.status === "Processing" && (
+                  {canManageRequests && selectedRequest.status === "Processing" && (
                     <Button 
                       variant="outline"
                       className="border-green-500 text-green-600 hover:bg-green-50"
@@ -442,7 +466,7 @@ const ManageRequests = () => {
                     </Button>
                   )}
                   
-                  {selectedRequest.status === "Approved" && (
+                  {canManageRequests && selectedRequest.status === "Approved" && (
                     <Button 
                       variant="outline"
                       className="border-green-500 text-green-600 hover:bg-green-50"
@@ -451,6 +475,15 @@ const ManageRequests = () => {
                       <Check className="mr-2 h-4 w-4" />
                       Mark as Completed
                     </Button>
+                  )}
+                  
+                  {!canManageRequests && (
+                    <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-md mt-4 w-full flex items-center">
+                      <AlertCircle className="h-5 w-5 mr-2" />
+                      <span>
+                        Only registrars can approve or reject document requests.
+                      </span>
+                    </div>
                   )}
                   
                   <Button

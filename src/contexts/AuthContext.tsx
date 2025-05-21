@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // Define the user roles
@@ -29,7 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const DEMO_USERS: User[] = [
   {
     id: '1',
-    name: 'John Doe',
+    name: 'Student User',
     email: 'student@school.edu',
     role: 'student',
     studentId: '2023-1234',
@@ -37,7 +36,7 @@ const DEMO_USERS: User[] = [
   },
   {
     id: '2',
-    name: 'Jane Smith',
+    name: 'Registrar User',
     email: 'registrar@school.edu',
     role: 'registrar',
     avatar: '/placeholder.svg',

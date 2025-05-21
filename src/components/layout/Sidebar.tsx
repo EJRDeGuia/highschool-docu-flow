@@ -81,7 +81,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       name: "Settings",
       href: "/dashboard/settings",
       icon: Settings,
-      roles: ["admin"],
+      roles: ["admin"], // Restrict Settings to admin only
     },
   ];
   
@@ -117,7 +117,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       >
         {/* Mobile close button */}
         <div className="flex items-center justify-between p-4 md:hidden">
-          <h1 className="font-semibold text-lg text-school-primary">Document System</h1>
+          <h1 className="font-semibold text-lg text-blue-600">Pinagtongulan INHS</h1>
           <Button 
             variant="ghost" 
             size="icon"
@@ -129,7 +129,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         
         {/* Logo (desktop) */}
         <div className="hidden md:flex items-center h-16 px-6 border-b border-gray-100">
-          <h1 className="font-semibold text-lg text-school-primary">Document System</h1>
+          <h1 className="font-semibold text-lg text-blue-600">Pinagtongulan INHS</h1>
         </div>
         
         {/* Navigation */}
@@ -142,7 +142,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                 className={cn(
                   "w-full justify-start text-sm font-medium",
                   pathname === item.href 
-                    ? "bg-school-primary text-white hover:bg-school-primary/90" 
+                    ? "bg-blue-600 text-white hover:bg-blue-700" 
                     : "text-gray-700 hover:bg-gray-100"
                 )}
                 onClick={() => {
@@ -166,7 +166,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
             onClick={handleProfileClick}
           >
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-school-primary flex items-center justify-center text-white shadow-md">
+              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md">
                 {user?.name.charAt(0).toUpperCase()}
               </div>
             </div>

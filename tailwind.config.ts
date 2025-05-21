@@ -63,17 +63,17 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // Enhanced school colors with better purple theme
+        // Blue theme colors
         school: {
-          primary: '#8B5CF6', // Bright purple
-          secondary: '#7C3AED', // Deep purple
-          accent: '#A78BFA', // Light purple
+          primary: '#1E40AF', // Deep blue
+          secondary: '#3B82F6', // Medium blue
+          accent: '#93C5FD', // Light blue
           background: '#F8FAFC', // Very light blue/gray
           success: '#10B981', // Green
           warning: '#F59E0B', // Amber
           error: '#EF4444', // Red
-          tertiary: '#6D28D9', // Another purple shade
-          quaternary: '#9333EA', // And another
+          tertiary: '#2563EB', // Royal blue
+          quaternary: '#60A5FA', // Sky blue
           gray: {
             50: '#F9FAFB',
             100: '#F3F4F6',
