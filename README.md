@@ -1,73 +1,169 @@
-# Welcome to your Lovable project
 
-## Project info
+# High School Document Request Management System
 
-**URL**: https://lovable.dev/projects/46e24f9b-98bc-41cb-bbd0-8114163e7b5a
+A comprehensive web-based application for managing high school document requests, built with React, TypeScript, and TailwindCSS.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Document Request Submission**: Students can submit requests for various school documents.
+- **Request Tracking**: Real-time tracking of document request status.
+- **Admin Dashboard**: For registrars and administrators to manage document requests.
+- **Payment Integration**: GCash QR code payment system with receipt upload.
+- **Role-Based Access Control**: Different views and permissions for students, registrars, and administrators.
+- **Notification System**: Real-time notifications for status updates.
+- **Search Functionality**: Find requests by various criteria.
+- **Database Backup**: Simulated backup and restore functionality.
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/46e24f9b-98bc-41cb-bbd0-8114163e7b5a) and start prompting.
+- **Frontend**:
+  - React with TypeScript
+  - TailwindCSS for styling
+  - shadcn/ui component library
+  - React Router for navigation
+  - React Query for data fetching
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Backend**:
+  - MySQL with phpMyAdmin (integration ready)
 
-**Use your preferred IDE**
+## Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js (v14 or higher)
+- npm or yarn
+- MySQL server with phpMyAdmin
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Clone the repository:
+   ```bash
+   git clone <your-repository-url>
+   cd document-request-system
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+4. The application will be available at `http://localhost:8080`
+
+### Database Setup
+
+1. Create a new MySQL database named `document_system` in phpMyAdmin.
+
+2. Import the SQL schema:
+   - Navigate to your phpMyAdmin interface
+   - Select the `document_system` database
+   - Click on "Import" in the top menu
+   - Choose the `database/schema.sql` file from the project
+   - Click "Go" to import the schema
+
+3. Configure the database connection:
+   - Update the database connection settings in the Settings page of the application when logged in as an admin.
+   - Default credentials: 
+     - Host: localhost
+     - Port: 3306
+     - Database: document_system
+     - Username: document_user
+     - Password: password
+
+## Project Structure
+
+```
+src/
+├── components/         # UI components
+│   ├── layout/         # Layout components like sidebar, header
+│   ├── requests/       # Request-related components
+│   ├── notifications/  # Notification components
+│   └── ui/             # shadcn/ui components
+├── contexts/           # React context providers
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions and helpers
+├── pages/              # Page components
+├── services/           # API service functions
+├── App.tsx             # Main app component with routes
+└── main.tsx            # Entry point
 ```
 
-**Edit a file directly in GitHub**
+## User Roles
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Student**:
+   - Submit document requests
+   - Track request status
+   - Upload payment receipts
+   - View request history
 
-**Use GitHub Codespaces**
+2. **Registrar**:
+   - View and manage all document requests
+   - Update request status
+   - Process document requests
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+3. **Admin**:
+   - All registrar permissions
+   - Manage user accounts
+   - Configure system settings
+   - Perform database backups
 
-## What technologies are used for this project?
+## Login Credentials (Demo)
 
-This project is built with:
+- **Student**: student@school.edu / password
+- **Registrar**: registrar@school.edu / password
+- **Admin**: admin@school.edu / password
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Development and Testing
 
-## How can I deploy this project?
+### Manual Testing
 
-Simply open [Lovable](https://lovable.dev/projects/46e24f9b-98bc-41cb-bbd0-8114163e7b5a) and click on Share -> Publish.
+Test the application thoroughly using the following steps:
 
-## Can I connect a custom domain to my Lovable project?
+1. Log in with different user roles
+2. Submit document requests
+3. Process requests through the entire workflow
+4. Test payment and receipt upload functionality
+5. Verify that notifications work correctly
+6. Test search functionality
+7. Verify role-based access controls
 
-Yes, you can!
+### Known Issues and Limitations
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- This version uses simulated data without actual database connections
+- GCash QR code is a simulation and does not process real payments
+- File uploads are simulated and don't persist between sessions
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Production Deployment
+
+For production deployment:
+
+1. Build the application:
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+
+2. Deploy the `dist` directory to your web server
+
+3. Set up the MySQL database on your production server
+
+4. Configure the database connection in the admin settings
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- shadcn/ui for the component library
+- Tailwind CSS for the utility-first CSS framework
+- React and TypeScript for the frontend foundation

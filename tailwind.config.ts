@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        // School colors
+        school: {
+          primary: '#2563EB',
+          secondary: '#1E40AF',
+          accent: '#60A5FA',
+          background: '#F8FAFC',
+          success: '#10B981',
+          warning: '#F59E0B',
+          error: '#EF4444',
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +95,20 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+        'shimmer': {
+          '0%': { backgroundPosition: '-1000px 0' },
+          '100%': { backgroundPosition: '1000px 0' },
+        },
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+        'shimmer': 'shimmer 2s infinite linear',
+			},
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
