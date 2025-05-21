@@ -153,8 +153,8 @@
 @layer utilities {
   /* Animation keyframes */
   @keyframes shimmer {
-    '0%': { backgroundPosition: '-1000px 0' },
-    '100%': { backgroundPosition: '1000px 0' },
+    0% { backgroundPosition: '-1000px 0' }
+    100% { backgroundPosition: '1000px 0' }
   }
   
   /* Card effects */
