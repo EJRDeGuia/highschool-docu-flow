@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotifications } from "../contexts/NotificationsContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import PageHeader from "../components/shared/PageHeader";
+import StatusBadge from "../components/shared/StatusBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
 import {
   ClipboardList,
   FileCheck,
@@ -12,9 +13,6 @@ import {
   FileX,
   Loader,
   ArrowRight,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 import { getRequestStatistics, getUserRequests } from "../services/requestService";
 
@@ -54,21 +52,40 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [user]);
 
-  // Display appropriate cards based on user role
-  const renderDashboardCards = () => {
-    if (isLoading) {
-      return (
+  // Display loading state
+  if (isLoading) {
+    return (
+      <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="flex flex-col items-center">
             <Loader className="w-10 h-10 animate-spin text-school-primary" />
             <p className="mt-4 text-gray-600">Loading dashboard data...</p>
           </div>
         </div>
-      );
-    }
+      </DashboardLayout>
+    );
+  }
 
+  // Display appropriate welcome message based on user role
+  const getWelcomeMessage = () => {
     if (user?.role === "student") {
-      return (
+      return "Track your document requests and submit new ones.";
+    } else if (user?.role === "registrar") {
+      return "Manage and process student document requests.";
+    } else {
+      return "Oversee the document request system and user management.";
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <PageHeader 
+        title={`Welcome, ${user?.name}!`} 
+        description={getWelcomeMessage()}
+      />
+
+      {/* Dashboard Cards */}
+      {user?.role === "student" ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <DashboardCard
             title="My Requests"
@@ -94,87 +111,68 @@ const Dashboard = () => {
             color="bg-green-50 text-green-600"
           />
         </div>
-      );
-    }
-
-    // For registrars and admins
-    return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <DashboardCard
-          title="Total Requests"
-          description="All document requests in the system"
-          value={(stats?.total || 0).toString()}
-          icon={<ClipboardList className="h-12 w-12" />}
-          color="bg-blue-50 text-blue-600"
-          gradient="from-blue-400 to-blue-600"
-        />
-        
-        <DashboardCard
-          title="Pending"
-          description="Requests waiting for review"
-          value={(stats?.pending || 0).toString()}
-          icon={<FileClock className="h-12 w-12" />}
-          color="bg-amber-50 text-amber-600"
-          gradient="from-amber-400 to-amber-600"
-        />
-        
-        <DashboardCard
-          title="Approved"
-          description="Requests approved and ready"
-          value={(stats?.approved || 0).toString()}
-          icon={<FileCheck className="h-12 w-12" />}
-          color="bg-emerald-50 text-emerald-600"
-          gradient="from-emerald-400 to-emerald-600"
-        />
-        
-        <DashboardCard
-          title="Processing"
-          description="Requests currently in progress"
-          value={(stats?.processing || 0).toString()}
-          icon={<FileClock className="h-12 w-12" />}
-          color="bg-purple-50 text-purple-600"
-          gradient="from-purple-400 to-purple-600"
-        />
-        
-        <DashboardCard
-          title="Completed"
-          description="Successfully completed requests"
-          value={(stats?.completed || 0).toString()}
-          icon={<FileCheck className="h-12 w-12" />}
-          color="bg-green-50 text-green-600"
-          gradient="from-green-400 to-green-600"
-        />
-        
-        <DashboardCard
-          title="Rejected"
-          description="Denied or cancelled requests"
-          value={(stats?.rejected || 0).toString()}
-          icon={<FileX className="h-12 w-12" />}
-          color="bg-red-50 text-red-600"
-          gradient="from-red-400 to-red-600"
-        />
-      </div>
-    );
-  };
-
-  return (
-    <DashboardLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-gray-800">Welcome, {user?.name}!</h1>
-        <p className="text-gray-600">
-          {user?.role === "student" 
-            ? "Track your document requests and submit new ones." 
-            : user?.role === "registrar"
-            ? "Manage and process student document requests."
-            : "Oversee the document request system and user management."}
-        </p>
-      </div>
-
-      {renderDashboardCards()}
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <DashboardCard
+            title="Total Requests"
+            description="All document requests in the system"
+            value={(stats?.total || 0).toString()}
+            icon={<ClipboardList className="h-12 w-12" />}
+            color="bg-blue-50 text-blue-600"
+            gradient="from-blue-400 to-blue-600"
+          />
+          
+          <DashboardCard
+            title="Pending"
+            description="Requests waiting for review"
+            value={(stats?.pending || 0).toString()}
+            icon={<FileClock className="h-12 w-12" />}
+            color="bg-amber-50 text-amber-600"
+            gradient="from-amber-400 to-amber-600"
+          />
+          
+          <DashboardCard
+            title="Approved"
+            description="Requests approved and ready"
+            value={(stats?.approved || 0).toString()}
+            icon={<FileCheck className="h-12 w-12" />}
+            color="bg-emerald-50 text-emerald-600"
+            gradient="from-emerald-400 to-emerald-600"
+          />
+          
+          <DashboardCard
+            title="Processing"
+            description="Requests currently in progress"
+            value={(stats?.processing || 0).toString()}
+            icon={<FileClock className="h-12 w-12" />}
+            color="bg-purple-50 text-purple-600"
+            gradient="from-purple-400 to-purple-600"
+          />
+          
+          <DashboardCard
+            title="Completed"
+            description="Successfully completed requests"
+            value={(stats?.completed || 0).toString()}
+            icon={<FileCheck className="h-12 w-12" />}
+            color="bg-green-50 text-green-600"
+            gradient="from-green-400 to-green-600"
+          />
+          
+          <DashboardCard
+            title="Rejected"
+            description="Denied or cancelled requests"
+            value={(stats?.rejected || 0).toString()}
+            icon={<FileX className="h-12 w-12" />}
+            color="bg-red-50 text-red-600"
+            gradient="from-red-400 to-red-600"
+          />
+        </div>
+      )}
       
+      {/* Quick Actions Section for Students */}
       {user?.role === "student" && (
         <div className="mt-8">
-          <Card className="overflow-hidden border-0 shadow-md">
+          <Card className="dashboard-card border-0">
             <CardHeader className="bg-gradient-to-r from-school-primary to-school-secondary text-white">
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription className="text-white/80">Things you might want to do</CardDescription>
@@ -205,9 +203,10 @@ const Dashboard = () => {
         </div>
       )}
       
+      {/* Recent Activity Section for Staff */}
       {(user?.role === "registrar" || user?.role === "admin") && (
         <div className="mt-8">
-          <Card className="overflow-hidden border-0 shadow-md">
+          <Card className="dashboard-card border-0">
             <CardHeader className="bg-gradient-to-r from-school-primary to-school-secondary text-white">
               <CardTitle>Recent Activity</CardTitle>
               <CardDescription className="text-white/80">Latest request updates</CardDescription>
@@ -253,9 +252,9 @@ interface DashboardCardProps {
 
 const DashboardCard = ({ title, description, value, icon, color, gradient }: DashboardCardProps) => {
   return (
-    <Card className="overflow-hidden border-0 shadow-md transition-all duration-300 hover:shadow-lg">
+    <Card className="dashboard-card border-0">
       <CardContent className="p-0">
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full">
           <div className={`p-6 ${gradient ? `bg-gradient-to-r ${gradient} text-white` : 'bg-white'}`}>
             <div className="flex items-center justify-between">
               <div>
@@ -307,26 +306,10 @@ interface ActivityItemProps {
   title: string;
   description: string;
   time: string;
-  status: string;
+  status: "Pending" | "Processing" | "Approved" | "Rejected" | "Completed";
 }
 
 const ActivityItem = ({ title, description, time, status }: ActivityItemProps) => {
-  const getStatusIcon = () => {
-    switch (status) {
-      case "Pending":
-        return <Clock className="h-4 w-4 text-amber-500" />;
-      case "Processing":
-        return <Clock className="h-4 w-4 text-purple-500" />;
-      case "Approved":
-      case "Completed":
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case "Rejected":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="flex items-start justify-between border-b border-gray-100 pb-4 hover:bg-gray-50 p-3 rounded-md -mx-3 transition-colors">
       <div>
@@ -336,19 +319,7 @@ const ActivityItem = ({ title, description, time, status }: ActivityItemProps) =
           <Clock className="h-3 w-3" /> {time}
         </p>
       </div>
-      <Badge
-        variant="outline"
-        className={`
-          flex items-center gap-1.5
-          ${status === "Pending" ? "status-pending" : ""}
-          ${status === "Processing" ? "status-pending" : ""}
-          ${status === "Approved" ? "status-approved" : ""}
-          ${status === "Rejected" ? "status-rejected" : ""}
-          ${status === "Completed" ? "status-approved" : ""}
-        `}
-      >
-        {getStatusIcon()} {status}
-      </Badge>
+      <StatusBadge status={status} />
     </div>
   );
 };

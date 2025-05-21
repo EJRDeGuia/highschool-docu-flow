@@ -23,8 +23,16 @@ interface SidebarProps {
   setIsOpen: (value: boolean) => void;
 }
 
-// Define the role type to avoid 'never' type errors
+// Define the user role type
 type UserRole = "student" | "registrar" | "admin";
+
+// Define the navigation item type for better type safety
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  roles: UserRole[];
+}
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const { user } = useAuth();
@@ -32,55 +40,55 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const { pathname } = useLocation();
   
   // Define navigation items based on user role
-  const navItems = [
+  const navItems: NavItem[] = [
     {
       name: "Dashboard",
       href: "/dashboard",
       icon: Home,
-      roles: ["student", "registrar", "admin"] as UserRole[],
+      roles: ["student", "registrar", "admin"],
     },
     {
       name: "My Requests",
       href: "/dashboard/my-requests",
       icon: FileText,
-      roles: ["student"] as UserRole[],
+      roles: ["student"],
     },
     {
       name: "New Request",
       href: "/dashboard/new-request",
       icon: ClipboardList,
-      roles: ["student"] as UserRole[],
+      roles: ["student"],
     },
     {
       name: "Manage Requests",
       href: "/dashboard/manage-requests",
       icon: ClipboardList,
-      roles: ["registrar", "admin"] as UserRole[],
+      roles: ["registrar", "admin"],
     },
     {
       name: "Users",
       href: "/dashboard/users",
       icon: Users,
-      roles: ["admin"] as UserRole[],
+      roles: ["admin"],
     },
     {
       name: "Backup",
       href: "/dashboard/backup",
       icon: Database,
-      roles: ["admin"] as UserRole[],
+      roles: ["admin"],
     },
     {
       name: "Settings",
       href: "/dashboard/settings",
       icon: Settings,
-      roles: ["admin"] as UserRole[],
+      roles: ["admin"],
     },
   ];
   
   // Filter nav items based on user role
-  const filteredNavItems = navItems.filter(item => 
-    user && user.role && item.roles.includes(user.role as UserRole)
-  );
+  const filteredNavItems = user?.role 
+    ? navItems.filter(item => item.roles.includes(user.role as UserRole))
+    : [];
   
   return (
     <>
@@ -95,7 +103,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed top-0 left-0 z-30 h-full w-64 bg-gradient-to-b from-white to-gray-50 shadow-lg border-r border-gray-100 transition-transform duration-300 md:relative md:translate-x-0",
+          "fixed top-0 left-0 z-30 h-full w-64 bg-white shadow-lg border-r border-gray-100 transition-transform duration-300 md:relative md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -147,7 +155,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white shadow-inner">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-school-primary to-school-primary/70 flex items-center justify-center text-white shadow-md">
+              <div className="h-10 w-10 rounded-full bg-school-primary flex items-center justify-center text-white shadow-md">
                 {user?.name.charAt(0).toUpperCase()}
               </div>
             </div>

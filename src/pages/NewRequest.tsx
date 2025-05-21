@@ -1,18 +1,20 @@
 
 import DashboardLayout from "../components/layout/DashboardLayout";
+import PageHeader from "../components/shared/PageHeader";
 import RequestForm from "../components/requests/RequestForm";
+import { Card } from "../components/ui/card";
 
 const NewRequest = () => {
   return (
     <DashboardLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">New Document Request</h1>
-        <p className="text-gray-600">
-          Fill out the form below to submit a new document request
-        </p>
-      </div>
+      <PageHeader
+        title="New Document Request"
+        description="Fill out the form below to submit a new document request"
+      />
       
-      <RequestForm />
+      <Card className="dashboard-card border-0 p-6">
+        <RequestForm />
+      </Card>
     </DashboardLayout>
   );
 };

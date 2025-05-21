@@ -41,7 +41,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-          {children}
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>
