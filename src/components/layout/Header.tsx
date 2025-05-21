@@ -2,10 +2,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from "../ui/dropdown-menu";
-import { Badge } from "../ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "../notifications/NotificationPopover";
 
@@ -26,15 +24,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (searchQuery.trim()) {
-      navigate(`/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
   
   const handleLogout = () => {
     logout();
@@ -54,7 +43,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 py-4 px-5 sticky top-0 z-10 flex items-center justify-between gap-4 shadow-sm">
+    <header className="bg-white border-b border-gray-100 py-4 px-5 sticky top-0 z-30 flex items-center justify-between gap-4 shadow-sm">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -64,16 +53,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        
-        <form onSubmit={handleSearch} className="relative hidden md:block max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search requests..."
-            className="pl-10 w-[280px] lg:w-[320px] bg-gray-50 border-gray-200 focus-visible:ring-school-primary"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </form>
       </div>
       
       <div className="flex items-center gap-5">
@@ -84,7 +63,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <Button variant="ghost" className="relative flex items-center gap-2 p-1 px-2 hover:bg-gray-50">
               <Avatar className="h-9 w-9 border-2 border-gray-100">
                 <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-gradient-to-br from-school-primary to-school-primary/80 text-white">
+                <AvatarFallback className="bg-gradient-to-br from-violet-600 to-violet-800 text-white">
                   {user ? getInitials(user.name) : "U"}
                 </AvatarFallback>
               </Avatar>

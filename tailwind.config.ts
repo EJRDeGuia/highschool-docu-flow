@@ -63,11 +63,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // Enhanced school colors
+        // Enhanced school colors with violet theme
         school: {
-          primary: '#2563EB', // Blue
-          secondary: '#1E40AF', // Deeper blue
-          accent: '#60A5FA', // Light blue
+          primary: '#8B5CF6', // Violet
+          secondary: '#7C3AED', // Deeper violet
+          accent: '#A78BFA', // Light violet
           background: '#F8FAFC', // Very light blue/gray
           success: '#10B981', // Green
           warning: '#F59E0B', // Amber
