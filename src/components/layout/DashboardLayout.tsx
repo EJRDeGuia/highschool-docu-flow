@@ -18,8 +18,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   // If loading, show loading spinner
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader className="h-8 w-8 animate-spin text-school-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center">
+          <Loader className="h-10 w-10 animate-spin text-school-primary" />
+          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -31,7 +34,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }
   
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-school-background">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       <div className="flex-1 flex flex-col min-h-screen">

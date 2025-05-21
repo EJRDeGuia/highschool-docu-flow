@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter(item => 
-    user && (user.role as UserRole) && item.roles.includes(user.role as UserRole)
+    user && user.role && item.roles.includes(user.role as UserRole)
   );
   
   return (
@@ -95,7 +95,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed top-0 left-0 z-30 h-full w-64 bg-white border-r border-gray-200 transition-transform duration-300 md:relative md:translate-x-0",
+          "fixed top-0 left-0 z-30 h-full w-64 bg-gradient-to-b from-white to-gray-50 shadow-lg border-r border-gray-100 transition-transform duration-300 md:relative md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -112,7 +112,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         </div>
         
         {/* Logo (desktop) */}
-        <div className="hidden md:flex items-center h-16 px-6">
+        <div className="hidden md:flex items-center h-16 px-6 border-b border-gray-100">
           <h1 className="font-semibold text-lg text-school-primary">Document System</h1>
         </div>
         
@@ -122,11 +122,11 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
             {filteredNavItems.map((item) => (
               <Button
                 key={item.href}
-                variant={pathname === item.href ? "secondary" : "ghost"}
+                variant={pathname === item.href ? "default" : "ghost"}
                 className={cn(
-                  "w-full justify-start",
+                  "w-full justify-start text-sm font-medium",
                   pathname === item.href 
-                    ? "bg-gray-100 text-gray-900" 
+                    ? "bg-school-primary text-white hover:bg-school-primary/90" 
                     : "text-gray-700 hover:bg-gray-100"
                 )}
                 onClick={() => {
@@ -144,11 +144,11 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         </nav>
         
         {/* User info (at bottom) */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white shadow-inner">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-school-primary/20 flex items-center justify-center text-school-primary">
-                {user?.name.charAt(0)}
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-school-primary to-school-primary/70 flex items-center justify-center text-white shadow-md">
+                {user?.name.charAt(0).toUpperCase()}
               </div>
             </div>
             <div className="overflow-hidden">

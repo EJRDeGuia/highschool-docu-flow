@@ -93,7 +93,17 @@
   }
 
   body {
-    @apply bg-school-background text-foreground;
+    @apply bg-school-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-gray-900 font-semibold tracking-tight;
+  }
+  
+  /* Improved focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-school-primary ring-offset-2 ring-offset-white;
   }
 }
 
@@ -104,14 +114,56 @@
   }
 
   .status-pending {
-    @apply bg-school-warning/20 text-school-warning border border-school-warning/30;
+    @apply bg-school-warning/10 text-school-warning border border-school-warning/20 font-medium;
   }
 
   .status-approved {
-    @apply bg-school-success/20 text-school-success border border-school-success/30;
+    @apply bg-school-success/10 text-school-success border border-school-success/20 font-medium;
   }
 
   .status-rejected {
-    @apply bg-school-error/20 text-school-error border border-school-error/30;
+    @apply bg-school-error/10 text-school-error border border-school-error/20 font-medium;
+  }
+  
+  /* Card hover effects */
+  .hover-card {
+    @apply transition-all duration-300 hover:shadow-md hover:border-school-primary/20;
+  }
+  
+  /* Button enhancements */
+  .btn-primary {
+    @apply bg-gradient-to-r from-school-primary to-school-secondary text-white font-medium;
+  }
+  
+  /* Form field styling */
+  .form-field {
+    @apply mb-4;
+  }
+  
+  .form-field label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+  
+  /* Table styles */
+  .table-row {
+    @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+  }
+}
+
+@layer utilities {
+  /* Animation keyframes */
+  @keyframes shimmer {
+    '0%': { backgroundPosition: '-1000px 0' },
+    '100%': { backgroundPosition: '1000px 0' },
+  }
+  
+  /* Card effects */
+  .card-shadow {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Text gradients */
+  .text-gradient {
+    @apply bg-gradient-to-r from-school-primary to-school-secondary bg-clip-text text-transparent;
   }
 }

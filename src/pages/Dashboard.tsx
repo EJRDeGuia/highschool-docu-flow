@@ -11,6 +11,10 @@ import {
   FileClock,
   FileX,
   Loader,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { getRequestStatistics, getUserRequests } from "../services/requestService";
 
@@ -55,7 +59,10 @@ const Dashboard = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-64">
-          <Loader className="w-8 h-8 animate-spin text-school-primary" />
+          <div className="flex flex-col items-center">
+            <Loader className="w-10 h-10 animate-spin text-school-primary" />
+            <p className="mt-4 text-gray-600">Loading dashboard data...</p>
+          </div>
         </div>
       );
     }
@@ -99,6 +106,7 @@ const Dashboard = () => {
           value={(stats?.total || 0).toString()}
           icon={<ClipboardList className="h-12 w-12" />}
           color="bg-blue-50 text-blue-600"
+          gradient="from-blue-400 to-blue-600"
         />
         
         <DashboardCard
@@ -107,6 +115,7 @@ const Dashboard = () => {
           value={(stats?.pending || 0).toString()}
           icon={<FileClock className="h-12 w-12" />}
           color="bg-amber-50 text-amber-600"
+          gradient="from-amber-400 to-amber-600"
         />
         
         <DashboardCard
@@ -115,6 +124,7 @@ const Dashboard = () => {
           value={(stats?.approved || 0).toString()}
           icon={<FileCheck className="h-12 w-12" />}
           color="bg-emerald-50 text-emerald-600"
+          gradient="from-emerald-400 to-emerald-600"
         />
         
         <DashboardCard
@@ -123,6 +133,7 @@ const Dashboard = () => {
           value={(stats?.processing || 0).toString()}
           icon={<FileClock className="h-12 w-12" />}
           color="bg-purple-50 text-purple-600"
+          gradient="from-purple-400 to-purple-600"
         />
         
         <DashboardCard
@@ -131,6 +142,7 @@ const Dashboard = () => {
           value={(stats?.completed || 0).toString()}
           icon={<FileCheck className="h-12 w-12" />}
           color="bg-green-50 text-green-600"
+          gradient="from-green-400 to-green-600"
         />
         
         <DashboardCard
@@ -139,6 +151,7 @@ const Dashboard = () => {
           value={(stats?.rejected || 0).toString()}
           icon={<FileX className="h-12 w-12" />}
           color="bg-red-50 text-red-600"
+          gradient="from-red-400 to-red-600"
         />
       </div>
     );
@@ -147,7 +160,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome, {user?.name}!</h1>
+        <h1 className="text-3xl font-bold mb-2 text-gray-800">Welcome, {user?.name}!</h1>
         <p className="text-gray-600">
           {user?.role === "student" 
             ? "Track your document requests and submit new ones." 
@@ -161,27 +174,30 @@ const Dashboard = () => {
       
       {user?.role === "student" && (
         <div className="mt-8">
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden border-0 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-school-primary to-school-secondary text-white">
               <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Things you might want to do</CardDescription>
+              <CardDescription className="text-white/80">Things you might want to do</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="grid gap-4 md:grid-cols-3">
                 <ActionCard
                   title="Request Document"
                   description="Submit a new document request"
                   link="/dashboard/new-request"
+                  icon={<ClipboardList className="h-5 w-5" />}
                 />
                 <ActionCard
                   title="My Requests"
                   description="View and track your requests"
                   link="/dashboard/my-requests"
+                  icon={<FileCheck className="h-5 w-5" />}
                 />
                 <ActionCard
                   title="Upload Receipt"
                   description="Upload a payment receipt"
                   link="/dashboard/receipt-upload"
+                  icon={<FileCheck className="h-5 w-5" />}
                 />
               </div>
             </CardContent>
@@ -191,10 +207,10 @@ const Dashboard = () => {
       
       {(user?.role === "registrar" || user?.role === "admin") && (
         <div className="mt-8">
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden border-0 shadow-md">
+            <CardHeader className="bg-gradient-to-r from-school-primary to-school-secondary text-white">
               <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest request updates</CardDescription>
+              <CardDescription className="text-white/80">Latest request updates</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -232,19 +248,24 @@ interface DashboardCardProps {
   value: string;
   icon: React.ReactNode;
   color: string;
+  gradient?: string;
 }
 
-const DashboardCard = ({ title, description, value, icon, color }: DashboardCardProps) => {
+const DashboardCard = ({ title, description, value, icon, color, gradient }: DashboardCardProps) => {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-            <p className="text-3xl font-bold">{value}</p>
-            <p className="text-sm text-gray-500 mt-1">{description}</p>
+    <Card className="overflow-hidden border-0 shadow-md transition-all duration-300 hover:shadow-lg">
+      <CardContent className="p-0">
+        <div className="flex flex-col">
+          <div className={`p-6 ${gradient ? `bg-gradient-to-r ${gradient} text-white` : 'bg-white'}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm font-medium ${gradient ? 'text-white/80' : 'text-gray-500'} mb-1`}>{title}</p>
+                <p className={`text-3xl font-bold ${gradient ? 'text-white' : ''}`}>{value}</p>
+              </div>
+              <div className={`p-3 rounded-full ${gradient ? 'bg-white/20' : color}`}>{icon}</div>
+            </div>
+            <p className={`text-sm mt-2 ${gradient ? 'text-white/80' : 'text-gray-500'}`}>{description}</p>
           </div>
-          <div className={`p-3 rounded-full ${color}`}>{icon}</div>
         </div>
       </CardContent>
     </Card>
@@ -256,16 +277,27 @@ interface ActionCardProps {
   title: string;
   description: string;
   link: string;
+  icon: React.ReactNode;
 }
 
-const ActionCard = ({ title, description, link }: ActionCardProps) => {
+const ActionCard = ({ title, description, link, icon }: ActionCardProps) => {
   return (
     <a 
       href={link}
-      className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+      className="group block p-5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-all duration-200 hover:shadow-md"
     >
-      <h3 className="font-medium mb-1">{title}</h3>
-      <p className="text-sm text-gray-500">{description}</p>
+      <div className="flex items-center gap-4">
+        <div className="bg-school-primary/10 text-school-primary p-3 rounded-lg">
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-medium text-gray-800 group-hover:text-school-primary transition-colors">{title}</h3>
+          <p className="text-sm text-gray-500">{description}</p>
+        </div>
+        <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+          <ArrowRight className="h-5 w-5 text-school-primary" />
+        </div>
+      </div>
     </a>
   );
 };
@@ -279,16 +311,35 @@ interface ActivityItemProps {
 }
 
 const ActivityItem = ({ title, description, time, status }: ActivityItemProps) => {
+  const getStatusIcon = () => {
+    switch (status) {
+      case "Pending":
+        return <Clock className="h-4 w-4 text-amber-500" />;
+      case "Processing":
+        return <Clock className="h-4 w-4 text-purple-500" />;
+      case "Approved":
+      case "Completed":
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case "Rejected":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="flex items-start justify-between border-b border-gray-100 pb-4">
+    <div className="flex items-start justify-between border-b border-gray-100 pb-4 hover:bg-gray-50 p-3 rounded-md -mx-3 transition-colors">
       <div>
-        <h4 className="font-medium">{title}</h4>
+        <h4 className="font-medium text-gray-800">{title}</h4>
         <p className="text-sm text-gray-500">{description}</p>
-        <p className="text-xs text-gray-400 mt-1">{time}</p>
+        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+          <Clock className="h-3 w-3" /> {time}
+        </p>
       </div>
       <Badge
         variant="outline"
         className={`
+          flex items-center gap-1.5
           ${status === "Pending" ? "status-pending" : ""}
           ${status === "Processing" ? "status-pending" : ""}
           ${status === "Approved" ? "status-approved" : ""}
@@ -296,7 +347,7 @@ const ActivityItem = ({ title, description, time, status }: ActivityItemProps) =
           ${status === "Completed" ? "status-approved" : ""}
         `}
       >
-        {status}
+        {getStatusIcon()} {status}
       </Badge>
     </div>
   );

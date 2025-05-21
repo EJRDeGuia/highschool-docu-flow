@@ -63,15 +63,27 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // School colors
+        // Enhanced school colors
         school: {
-          primary: '#2563EB',
-          secondary: '#1E40AF',
-          accent: '#60A5FA',
-          background: '#F8FAFC',
-          success: '#10B981',
-          warning: '#F59E0B',
-          error: '#EF4444',
+          primary: '#2563EB', // Blue
+          secondary: '#1E40AF', // Deeper blue
+          accent: '#60A5FA', // Light blue
+          background: '#F8FAFC', // Very light blue/gray
+          success: '#10B981', // Green
+          warning: '#F59E0B', // Amber
+          error: '#EF4444', // Red
+          gray: {
+            50: '#F9FAFB',
+            100: '#F3F4F6',
+            200: '#E5E7EB',
+            300: '#D1D5DB',
+            400: '#9CA3AF',
+            500: '#6B7280', 
+            600: '#4B5563',
+            700: '#374151',
+            800: '#1F2937',
+            900: '#111827',
+          }
         }
 			},
 			borderRadius: {
@@ -100,14 +112,32 @@ export default {
           '0%': { backgroundPosition: '-1000px 0' },
           '100%': { backgroundPosition: '1000px 0' },
         },
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-in': {
+          '0%': { transform: 'translateX(-20px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
         'shimmer': 'shimmer 2s infinite linear',
+        'fade-in': 'fade-in 0.4s ease-out forwards',
+        'slide-in': 'slide-in 0.4s ease-out forwards',
 			},
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+      },
+      boxShadow: {
+        'card': '0 4px 20px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 10px 30px rgba(0, 0, 0, 0.08)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-card': 'linear-gradient(to right bottom, var(--tw-gradient-stops))',
       }
 		}
 	},
