@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -36,7 +35,7 @@ const formSchema = z.object({
     message: "Purpose must be at least 5 characters."
   }),
   additionalDetails: z.string().optional(),
-  copies: z.string().transform((val) => parseInt(val, 10)).refine((val) => val > 0, {
+  copies: z.coerce.number().min(1, { // Changed to coerce.number() to handle string to number conversion
     message: "Number of copies must be at least 1."
   }),
 });
@@ -64,7 +63,7 @@ const RequestForm = () => {
       documentType: "",
       purpose: "",
       additionalDetails: "",
-      copies: "1",
+      copies: 1, // Changed from string "1" to number 1
     },
   });
   
@@ -114,7 +113,7 @@ const RequestForm = () => {
   
   const calculateTotalFee = () => {
     const docType = documentTypes.find(doc => doc.id === form.watch("documentType"));
-    const copies = parseInt(form.watch("copies") || "1", 10);
+    const copies = form.watch("copies") || 1;
     
     if (docType) {
       return docType.fee * copies;
@@ -181,6 +180,8 @@ const RequestForm = () => {
                         type="number"
                         min="1"
                         {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        value={field.value}
                       />
                     </FormControl>
                     <FormMessage />

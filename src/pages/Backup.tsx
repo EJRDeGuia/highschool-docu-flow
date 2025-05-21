@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
@@ -23,6 +22,15 @@ import {
   Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Define the backup history item type to ensure type safety
+type BackupHistoryItemType = {
+  id: string;
+  date: string;
+  size: string;
+  status: 'success' | 'failed' | 'pending';
+  type: 'backup' | 'restore';
+};
 
 const BackupHistoryItem = ({
   date,
@@ -77,27 +85,27 @@ const Backup = () => {
   const [isRestoreInProgress, setIsRestoreInProgress] = useState(false);
   const [backupProgress, setBackupProgress] = useState(0);
   const [restoreProgress, setRestoreProgress] = useState(0);
-  const [backupHistory, setBackupHistory] = useState([
+  const [backupHistory, setBackupHistory] = useState<BackupHistoryItemType[]>([
     {
       id: '1',
       date: '2023-05-20 10:15 AM',
       size: '2.3 MB',
-      status: 'success' as const,
-      type: 'backup' as const,
+      status: 'success',
+      type: 'backup',
     },
     {
       id: '2',
       date: '2023-05-15 09:30 AM',
       size: '2.1 MB',
-      status: 'success' as const,
-      type: 'backup' as const,
+      status: 'success',
+      type: 'backup',
     },
     {
       id: '3',
       date: '2023-05-10 14:45 PM',
       size: '1.9 MB',
-      status: 'success' as const,
-      type: 'backup' as const,
+      status: 'success',
+      type: 'backup',
     },
   ]);
 
@@ -122,12 +130,12 @@ const Backup = () => {
           setIsBackupInProgress(false);
           
           // Add backup to history
-          const newBackup = {
+          const newBackup: BackupHistoryItemType = {
             id: Math.random().toString(36).substring(2, 15),
             date: new Date().toLocaleString(),
             size: '2.5 MB',
-            status: 'success' as const,
-            type: 'backup' as const,
+            status: 'success',
+            type: 'backup',
           };
           
           setBackupHistory([newBackup, ...backupHistory]);
@@ -171,15 +179,15 @@ const Backup = () => {
           setIsRestoreInProgress(false);
           
           // Add restore to history
-          const newRestore = {
+          const newRestore: BackupHistoryItemType = {
             id: Math.random().toString(36).substring(2, 15),
             date: new Date().toLocaleString(),
             size: '2.5 MB',
-            status: 'success' as const,
-            type: 'restore' as const,
+            status: 'success',
+            type: 'restore',
           };
           
-          setBackupHistory([newRestore,  ...backupHistory]);
+          setBackupHistory([newRestore, ...backupHistory]);
           
           // Show success message
           toast({

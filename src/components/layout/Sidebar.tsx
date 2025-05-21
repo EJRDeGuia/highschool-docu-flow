@@ -23,6 +23,9 @@ interface SidebarProps {
   setIsOpen: (value: boolean) => void;
 }
 
+// Define the role type to avoid 'never' type errors
+type UserRole = "student" | "registrar" | "admin";
+
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -34,49 +37,49 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       name: "Dashboard",
       href: "/dashboard",
       icon: Home,
-      roles: ["student", "registrar", "admin"] as const,
+      roles: ["student", "registrar", "admin"] as UserRole[],
     },
     {
       name: "My Requests",
       href: "/dashboard/my-requests",
       icon: FileText,
-      roles: ["student"] as const,
+      roles: ["student"] as UserRole[],
     },
     {
       name: "New Request",
       href: "/dashboard/new-request",
       icon: ClipboardList,
-      roles: ["student"] as const,
+      roles: ["student"] as UserRole[],
     },
     {
       name: "Manage Requests",
       href: "/dashboard/manage-requests",
       icon: ClipboardList,
-      roles: ["registrar", "admin"] as const,
+      roles: ["registrar", "admin"] as UserRole[],
     },
     {
       name: "Users",
       href: "/dashboard/users",
       icon: Users,
-      roles: ["admin"] as const,
+      roles: ["admin"] as UserRole[],
     },
     {
       name: "Backup",
       href: "/dashboard/backup",
       icon: Database,
-      roles: ["admin"] as const,
+      roles: ["admin"] as UserRole[],
     },
     {
       name: "Settings",
       href: "/dashboard/settings",
       icon: Settings,
-      roles: ["admin"] as const,
+      roles: ["admin"] as UserRole[],
     },
   ];
   
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter(item => 
-    user && item.roles.includes(user.role)
+    user && (user.role as UserRole) && item.roles.includes(user.role as UserRole)
   );
   
   return (
