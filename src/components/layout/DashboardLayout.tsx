@@ -20,8 +20,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center">
-          <Loader className="h-10 w-10 animate-spin text-school-primary" />
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+          <Loader className="h-12 w-12 animate-spin text-school-primary" />
+          <p className="mt-6 text-gray-600 font-medium">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -40,10 +40,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+        <main className="flex-1 p-5 md:p-8 overflow-y-auto">
+          {children}
         </main>
       </div>
     </div>

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 interface PageHeaderProps {
   title: string;
@@ -10,18 +11,22 @@ interface PageHeaderProps {
     icon?: React.ReactNode;
     onClick: () => void;
   }
+  className?: string;
 }
 
-const PageHeader = ({ title, description, action }: PageHeaderProps) => {
+const PageHeader = ({ title, description, action, className }: PageHeaderProps) => {
   return (
-    <div className="dashboard-header">
+    <div className={cn("flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6", className)}>
       <div>
-        <h1 className="text-3xl font-bold mb-2 text-gray-800">{title}</h1>
-        {description && <p className="text-gray-600">{description}</p>}
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-800">{title}</h1>
+        {description && <p className="text-gray-600 max-w-2xl">{description}</p>}
       </div>
       
       {action && (
-        <Button onClick={action.onClick}>
+        <Button 
+          onClick={action.onClick}
+          className="shrink-0"
+        >
           {action.icon && <span className="mr-2">{action.icon}</span>}
           {action.label}
         </Button>

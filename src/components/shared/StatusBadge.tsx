@@ -1,26 +1,28 @@
 
 import React from 'react';
 import { Badge } from "../ui/badge";
-import { Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type StatusType = "Pending" | "Processing" | "Approved" | "Rejected" | "Completed";
 
 interface StatusBadgeProps {
   status: StatusType;
+  className?: string;
 }
 
-const StatusBadge = ({ status }: StatusBadgeProps) => {
+const StatusBadge = ({ status, className }: StatusBadgeProps) => {
   const getStatusIcon = () => {
     switch (status) {
       case "Pending":
-        return <Clock className="h-4 w-4" />;
+        return <Clock className="h-3.5 w-3.5" />;
       case "Processing":
-        return <Clock className="h-4 w-4" />;
+        return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
       case "Approved":
       case "Completed":
-        return <CheckCircle2 className="h-4 w-4" />;
+        return <CheckCircle2 className="h-3.5 w-3.5" />;
       case "Rejected":
-        return <AlertCircle className="h-4 w-4" />;
+        return <AlertCircle className="h-3.5 w-3.5" />;
       default:
         return null;
     }
@@ -29,14 +31,15 @@ const StatusBadge = ({ status }: StatusBadgeProps) => {
   return (
     <Badge
       variant="outline"
-      className={`
-        flex items-center gap-1.5
-        ${status === "Pending" ? "status-pending" : ""}
-        ${status === "Processing" ? "status-processing" : ""}
-        ${status === "Approved" ? "status-approved" : ""}
-        ${status === "Rejected" ? "status-rejected" : ""}
-        ${status === "Completed" ? "status-completed" : ""}
-      `}
+      className={cn(
+        "flex items-center gap-1.5 py-1.5 px-2.5 font-medium text-xs",
+        status === "Pending" ? "status-pending" : "",
+        status === "Processing" ? "status-processing" : "",
+        status === "Approved" ? "status-approved" : "",
+        status === "Rejected" ? "status-rejected" : "",
+        status === "Completed" ? "status-completed" : "",
+        className
+      )}
     >
       {getStatusIcon()} {status}
     </Badge>
