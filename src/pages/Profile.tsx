@@ -9,7 +9,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import PageHeader from "../components/shared/PageHeader";
-import { UserCog, Save, UserCheck } from "lucide-react";
+import { UserCog, Save, UserCheck, AlertCircle } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -24,6 +24,9 @@ const Profile = () => {
   });
   
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Check if user is admin - only admins can edit profiles
+  const canEdit = user?.role === 'admin';
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -95,20 +98,22 @@ const Profile = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-medium">Account Information</h3>
-                  <Button 
-                    type="button"
-                    variant={isEditing ? "outline" : "default"}
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    {isEditing ? (
-                      <>Cancel</>
-                    ) : (
-                      <>
-                        <UserCog className="mr-2 h-4 w-4" />
-                        Edit Profile
-                      </>
-                    )}
-                  </Button>
+                  {canEdit && (
+                    <Button 
+                      type="button"
+                      variant={isEditing ? "outline" : "default"}
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
+                      {isEditing ? (
+                        <>Cancel</>
+                      ) : (
+                        <>
+                          <UserCog className="mr-2 h-4 w-4" />
+                          Edit Profile
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
                 
                 <div className="grid gap-6">
@@ -151,7 +156,7 @@ const Profile = () => {
                     </div>
                   )}
                   
-                  {isEditing && (
+                  {isEditing && canEdit && (
                     <>
                       <div className="pt-4 border-t">
                         <h4 className="font-medium mb-4">Change Password</h4>
@@ -190,11 +195,20 @@ const Profile = () => {
                     </>
                   )}
                   
-                  {!isEditing && (
+                  {!canEdit && (
+                    <div className="bg-amber-50 text-amber-700 rounded-lg p-4 flex items-start">
+                      <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm">
+                        Only administrators can edit profile information. Please contact an administrator if you need to update your information.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {!isEditing && canEdit && (
                     <div className="bg-blue-50 text-blue-700 rounded-lg p-4 flex items-start">
                       <UserCheck className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
                       <p className="text-sm">
-                        Your profile information is used across the system. To update your information, click the "Edit Profile" button above.
+                        You can update profile information by clicking the "Edit Profile" button above.
                       </p>
                     </div>
                   )}

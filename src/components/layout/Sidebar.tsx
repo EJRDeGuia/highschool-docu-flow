@@ -89,6 +89,14 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const filteredNavItems = user?.role 
     ? navItems.filter(item => item.roles.includes(user.role as UserRole))
     : [];
+    
+  // Handle navigation to profile
+  const handleProfileClick = () => {
+    navigate("/dashboard/profile");
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+  };
   
   return (
     <>
@@ -153,7 +161,10 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         
         {/* User info (at bottom) */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white shadow-inner">
-          <div className="flex items-center space-x-3">
+          <div 
+            className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
+            onClick={handleProfileClick}
+          >
             <div className="flex-shrink-0">
               <div className="h-10 w-10 rounded-full bg-school-primary flex items-center justify-center text-white shadow-md">
                 {user?.name.charAt(0).toUpperCase()}
