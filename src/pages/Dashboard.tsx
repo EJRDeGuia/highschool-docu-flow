@@ -113,7 +113,7 @@ const Dashboard = () => {
         {(user?.role === "registrar" || user?.role === "admin") && <div className="mt-10">
             <Card className="dashboard-card overflow-hidden border-0 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-school-primary to-school-secondary text-white p-6">
-                <CardTitle className="text-xl font-semibold">Recent Activity</CardTitle>
+                <CardTitle className="text-xl font-semibold text-slate-50">Recent Activity</CardTitle>
                 <CardDescription className="text-white/90 mt-1">Latest request updates</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
