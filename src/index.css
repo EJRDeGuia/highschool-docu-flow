@@ -103,7 +103,7 @@
   
   /* Improved focus styles */
   *:focus-visible {
-    @apply outline-none ring-2 ring-violet-500 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-school-primary ring-offset-2 ring-offset-white;
   }
 }
 
@@ -135,7 +135,7 @@
   }
   
   .card-hover {
-    @apply hover:shadow-lg hover:border-violet-300 transition-all duration-200;
+    @apply hover:shadow-lg hover:border-school-primary/30 transition-all duration-200;
   }
   
   .dashboard-card {
@@ -160,6 +160,31 @@
     @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-no-repeat animate-shimmer;
     background-size: 1000px 100%;
   }
+
+  /* Improved text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-school-primary to-school-secondary bg-clip-text text-transparent;
+  }
+
+  /* Button styles */
+  .btn-gradient {
+    @apply bg-gradient-to-r from-school-primary to-school-secondary hover:from-school-secondary hover:to-school-primary text-white shadow-md transition-all duration-200;
+  }
+
+  /* Card styles */
+  .card-gradient {
+    @apply bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 rounded-lg;
+  }
+
+  /* Enhanced shadows */
+  .shadow-soft {
+    @apply shadow-[0_4px_20px_rgba(0,0,0,0.05)];
+  }
 }
 
 @layer utilities {
@@ -171,7 +196,7 @@
   
   /* Text styles */
   .text-gradient {
-    @apply bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-school-primary to-school-secondary bg-clip-text text-transparent;
   }
   
   /* Card effects */
@@ -192,5 +217,15 @@
   /* Spacing utilities */
   .section-spacing {
     @apply my-8;
+  }
+
+  /* Enhanced hover effects */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  /* Responsive paddings */
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8 lg:px-12;
   }
 }

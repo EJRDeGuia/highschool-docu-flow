@@ -32,7 +32,7 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
     <Badge
       variant="outline"
       className={cn(
-        "flex items-center gap-1.5 py-1.5 px-2.5 font-medium text-xs",
+        "flex items-center gap-1.5 py-1.5 px-2.5 font-medium text-xs rounded-full",
         status === "Pending" ? "status-pending" : "",
         status === "Processing" ? "status-processing" : "",
         status === "Approved" ? "status-approved" : "",
