@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 
 // Pages
@@ -22,7 +22,54 @@ import Backup from "./pages/Backup";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 
+// Route protection component for admin-only routes
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (user.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const queryClient = new QueryClient();
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/my-requests" element={<MyRequests />} />
+      <Route path="/dashboard/new-request" element={<NewRequest />} />
+      <Route path="/dashboard/manage-requests" element={<ManageRequests />} />
+      <Route path="/dashboard/receipt-upload" element={<ReceiptUploadPage />} />
+      <Route path="/dashboard/search" element={<Search />} />
+      <Route path="/dashboard/users" element={
+        <AdminRoute>
+          <Users />
+        </AdminRoute>
+      } />
+      <Route path="/dashboard/backup" element={
+        <AdminRoute>
+          <Backup />
+        </AdminRoute>
+      } />
+      <Route path="/dashboard/settings" element={
+        <AdminRoute>
+          <Settings />
+        </AdminRoute>
+      } />
+      <Route path="/dashboard/profile" element={<Profile />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -32,21 +79,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/my-requests" element={<MyRequests />} />
-              <Route path="/dashboard/new-request" element={<NewRequest />} />
-              <Route path="/dashboard/manage-requests" element={<ManageRequests />} />
-              <Route path="/dashboard/receipt-upload" element={<ReceiptUploadPage />} />
-              <Route path="/dashboard/search" element={<Search />} />
-              <Route path="/dashboard/users" element={<Users />} />
-              <Route path="/dashboard/backup" element={<Backup />} />
-              <Route path="/dashboard/settings" element={<Settings />} />
-              <Route path="/dashboard/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppRoutes />
           </BrowserRouter>
         </TooltipProvider>
       </NotificationsProvider>
