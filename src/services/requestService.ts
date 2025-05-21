@@ -34,214 +34,46 @@ export interface RequestTimelineItem {
   note?: string;
 }
 
-// Mock data for document requests
-const mockRequests: DocumentRequest[] = [
-  {
-    id: 'REQ-2023-001',
-    userId: '1', // Student user
-    documentType: 'transcript',
-    documentTypeName: 'Transcript of Records',
-    purpose: 'College Application',
-    additionalDetails: 'Needed for scholarship application',
-    copies: 2,
-    status: 'Processing',
-    createdAt: '2023-05-15T10:30:00Z',
-    updatedAt: '2023-05-16T14:20:00Z',
-    fee: 200,
-    hasPaid: true,
-    hasUploadedReceipt: true,
-    timeline: [
-      {
-        id: '1',
-        step: 'Request Submitted',
-        status: 'completed',
-        date: '2023-05-15 10:30 AM',
-        note: 'Document request submitted successfully.'
-      },
-      {
-        id: '2',
-        step: 'Payment Completed',
-        status: 'completed',
-        date: '2023-05-15 11:45 AM',
-        note: 'Payment receipt uploaded and verified.'
-      },
-      {
-        id: '3',
-        step: 'Processing Request',
-        status: 'current',
-        date: '2023-05-16 14:20 PM',
-        note: 'Your request is being processed by the registrar.'
-      },
-      {
-        id: '4',
-        step: 'Document Ready',
-        status: 'pending'
-      },
-      {
-        id: '5',
-        step: 'Completed',
-        status: 'pending'
-      }
-    ]
-  },
-  {
-    id: 'REQ-2023-002',
-    userId: '1', // Student user
-    documentType: 'certificate',
-    documentTypeName: 'Certificate of Enrollment',
-    purpose: 'Employment',
-    copies: 1,
-    status: 'Completed',
-    createdAt: '2023-04-20T09:15:00Z',
-    updatedAt: '2023-04-22T16:30:00Z',
-    fee: 50,
-    hasPaid: true,
-    hasUploadedReceipt: true,
-    timeline: [
-      {
-        id: '1',
-        step: 'Request Submitted',
-        status: 'completed',
-        date: '2023-04-20 09:15 AM'
-      },
-      {
-        id: '2',
-        step: 'Payment Completed',
-        status: 'completed',
-        date: '2023-04-20 10:20 AM'
-      },
-      {
-        id: '3',
-        step: 'Processing Request',
-        status: 'completed',
-        date: '2023-04-21 11:30 AM'
-      },
-      {
-        id: '4',
-        step: 'Document Ready',
-        status: 'completed',
-        date: '2023-04-22 14:45 PM'
-      },
-      {
-        id: '5',
-        step: 'Completed',
-        status: 'completed',
-        date: '2023-04-22 16:30 PM',
-        note: 'Document has been released and marked as completed.'
-      }
-    ]
-  },
-  {
-    id: 'REQ-2023-003',
-    userId: '1', // Student user
-    documentType: 'goodMoral',
-    documentTypeName: 'Certificate of Good Moral Character',
-    purpose: 'Scholarship Application',
-    copies: 3,
-    status: 'Pending',
-    createdAt: '2023-05-18T08:45:00Z',
-    updatedAt: '2023-05-18T08:45:00Z',
-    fee: 150,
-    hasPaid: false,
-    hasUploadedReceipt: false,
-    timeline: [
-      {
-        id: '1',
-        step: 'Request Submitted',
-        status: 'completed',
-        date: '2023-05-18 08:45 AM'
-      },
-      {
-        id: '2',
-        step: 'Payment Completed',
-        status: 'pending'
-      },
-      {
-        id: '3',
-        step: 'Processing Request',
-        status: 'pending'
-      },
-      {
-        id: '4',
-        step: 'Document Ready',
-        status: 'pending'
-      },
-      {
-        id: '5',
-        step: 'Completed',
-        status: 'pending'
-      }
-    ]
-  },
-  {
-    id: 'REQ-2023-004',
-    userId: '2', // Registrar user for testing
-    documentType: 'diploma',
-    documentTypeName: 'Diploma',
-    purpose: 'Personal Records',
-    copies: 1,
-    status: 'Approved',
-    createdAt: '2023-05-10T13:20:00Z',
-    updatedAt: '2023-05-17T09:30:00Z',
-    fee: 200,
-    hasPaid: true,
-    hasUploadedReceipt: true,
-    timeline: [
-      {
-        id: '1',
-        step: 'Request Submitted',
-        status: 'completed',
-        date: '2023-05-10 13:20 PM'
-      },
-      {
-        id: '2',
-        step: 'Payment Completed',
-        status: 'completed',
-        date: '2023-05-10 14:30 PM'
-      },
-      {
-        id: '3',
-        step: 'Processing Request',
-        status: 'completed',
-        date: '2023-05-15 10:15 AM'
-      },
-      {
-        id: '4',
-        step: 'Document Ready',
-        status: 'completed',
-        date: '2023-05-17 09:30 AM',
-        note: 'Your document is ready for pickup at the registrar\'s office.'
-      },
-      {
-        id: '5',
-        step: 'Completed',
-        status: 'pending'
-      }
-    ]
-  }
-];
-
-// Service functions
+// These endpoint URLs should be replaced with your actual API endpoints
+const API_BASE_URL = '/api';
 
 // Get all requests (for admin/registrar)
 export const getAllRequests = async (): Promise<DocumentRequest[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return [...mockRequests];
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests`);
+  // if (!response.ok) throw new Error('Failed to fetch requests');
+  // return await response.json();
+  
+  // Temporary: Return empty array until API is implemented
+  return [];
 };
 
 // Get requests for a specific user
 export const getUserRequests = async (userId: string): Promise<DocumentRequest[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockRequests.filter(request => request.userId === userId);
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/user/${userId}`);
+  // if (!response.ok) throw new Error('Failed to fetch user requests');
+  // return await response.json();
+  
+  // Temporary: Return empty array until API is implemented
+  return [];
 };
 
 // Get a specific request by ID
 export const getRequestById = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return mockRequests.find(request => request.id === requestId);
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/${requestId}`);
+  // if (!response.ok) {
+  //   if (response.status === 404) return undefined;
+  //   throw new Error('Failed to fetch request');
+  // }
+  // return await response.json();
+  
+  // Temporary: Return undefined until API is implemented
+  return undefined;
 };
 
 // Update request status
@@ -250,90 +82,23 @@ export const updateRequestStatus = async (
   status: RequestStatus,
   note?: string
 ): Promise<DocumentRequest | undefined> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/${requestId}/status`, {
+  //   method: 'PUT',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ status, note }),
+  // });
+  // if (!response.ok) {
+  //   if (response.status === 404) return undefined;
+  //   throw new Error('Failed to update request status');
+  // }
+  // return await response.json();
   
-  const requestIndex = mockRequests.findIndex(request => request.id === requestId);
-  
-  if (requestIndex === -1) {
-    return undefined;
-  }
-  
-  // Clone the request
-  const updatedRequest = { ...mockRequests[requestIndex] };
-  
-  // Update status
-  updatedRequest.status = status;
-  updatedRequest.updatedAt = new Date().toISOString();
-  
-  // Update timeline based on status
-  let timelineStep = '';
-  let timelineIndex = -1;
-  
-  switch (status) {
-    case 'Processing':
-      timelineStep = 'Processing Request';
-      timelineIndex = 2;
-      break;
-    case 'Approved':
-      timelineStep = 'Document Ready';
-      timelineIndex = 3;
-      break;
-    case 'Completed':
-      timelineStep = 'Completed';
-      timelineIndex = 4;
-      break;
-    case 'Rejected':
-      timelineStep = 'Request Rejected';
-      if (!updatedRequest.timeline.find(t => t.step === 'Request Rejected')) {
-        updatedRequest.timeline.push({
-          id: `${updatedRequest.timeline.length + 1}`,
-          step: 'Request Rejected',
-          status: 'current',
-          date: new Date().toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          }),
-          note: note || 'Your request has been rejected.'
-        });
-      }
-      break;
-    default:
-      break;
-  }
-  
-  if (timelineIndex >= 0) {
-    updatedRequest.timeline = updatedRequest.timeline.map((item, index) => {
-      if (index < timelineIndex) {
-        return { ...item, status: 'completed' as const };
-      } else if (index === timelineIndex) {
-        return {
-          ...item,
-          status: 'current' as const,
-          date: new Date().toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          }),
-          note: note || undefined
-        };
-      } else {
-        return { ...item, status: 'pending' as const };
-      }
-    });
-  }
-  
-  // Update the request in the mock database
-  mockRequests[requestIndex] = updatedRequest;
-  
-  return updatedRequest;
+  // Temporary: Return undefined until API is implemented
+  return undefined;
 };
 
 // Create new request
@@ -346,11 +111,29 @@ export const createRequest = async (
   additionalDetails?: string,
   fee?: number
 ): Promise<DocumentRequest> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     userId,
+  //     documentType,
+  //     documentTypeName,
+  //     purpose,
+  //     copies,
+  //     additionalDetails,
+  //     fee,
+  //   }),
+  // });
+  // if (!response.ok) throw new Error('Failed to create request');
+  // return await response.json();
   
-  const newRequest: DocumentRequest = {
-    id: `REQ-${new Date().getFullYear()}-${String(mockRequests.length + 1).padStart(3, '0')}`,
+  // Temporary: Return a placeholder request with minimal data until API is implemented
+  const placeholderRequest: DocumentRequest = {
+    id: 'pending',
     userId,
     documentType,
     documentTypeName,
@@ -360,134 +143,92 @@ export const createRequest = async (
     status: 'Pending',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    fee: fee || 50 * copies, // Default fee
+    fee: fee || copies * 50,
     hasPaid: false,
     hasUploadedReceipt: false,
     timeline: [
       {
         id: '1',
         step: 'Request Submitted',
-        status: 'completed',
-        date: new Date().toLocaleString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        }),
-        note: 'Document request submitted successfully.'
-      },
-      {
-        id: '2',
-        step: 'Payment Completed',
-        status: 'pending'
-      },
-      {
-        id: '3',
-        step: 'Processing Request',
-        status: 'pending'
-      },
-      {
-        id: '4',
-        step: 'Document Ready',
-        status: 'pending'
-      },
-      {
-        id: '5',
-        step: 'Completed',
-        status: 'pending'
+        status: 'current',
+        date: new Date().toLocaleString(),
       }
     ]
   };
   
-  mockRequests.push(newRequest);
-  return newRequest;
+  return placeholderRequest;
 };
 
 // Mark request as paid
 export const markRequestAsPaid = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/${requestId}/payment`, {
+  //   method: 'PUT',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ hasPaid: true }),
+  // });
+  // if (!response.ok) {
+  //   if (response.status === 404) return undefined;
+  //   throw new Error('Failed to mark request as paid');
+  // }
+  // return await response.json();
   
-  const requestIndex = mockRequests.findIndex(request => request.id === requestId);
-  
-  if (requestIndex === -1) {
-    return undefined;
-  }
-  
-  // Clone the request
-  const updatedRequest = { ...mockRequests[requestIndex] };
-  
-  // Update paid status
-  updatedRequest.hasPaid = true;
-  updatedRequest.updatedAt = new Date().toISOString();
-  
-  // Update timeline
-  const paymentTimelineIndex = updatedRequest.timeline.findIndex(item => item.step === 'Payment Completed');
-  
-  if (paymentTimelineIndex !== -1) {
-    updatedRequest.timeline[paymentTimelineIndex] = {
-      ...updatedRequest.timeline[paymentTimelineIndex],
-      status: 'completed',
-      date: new Date().toLocaleString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      }),
-      note: 'Payment verified successfully.'
-    };
-  }
-  
-  // Update the request in the mock database
-  mockRequests[requestIndex] = updatedRequest;
-  
-  return updatedRequest;
+  // Temporary: Return undefined until API is implemented
+  return undefined;
 };
 
 // Mark receipt as uploaded
 export const markReceiptUploaded = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/${requestId}/receipt`, {
+  //   method: 'PUT',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ hasUploadedReceipt: true }),
+  // });
+  // if (!response.ok) {
+  //   if (response.status === 404) return undefined;
+  //   throw new Error('Failed to mark receipt as uploaded');
+  // }
+  // return await response.json();
   
-  const requestIndex = mockRequests.findIndex(request => request.id === requestId);
+  // Temporary: Return undefined until API is implemented
+  return undefined;
+};
+
+// Upload receipt file
+export const uploadReceipt = async (requestId: string, file: File): Promise<boolean> => {
+  // In a real implementation, this would upload the file to your API
+  // For example:
+  // const formData = new FormData();
+  // formData.append('receipt', file);
+  //
+  // const response = await fetch(`${API_BASE_URL}/requests/${requestId}/receipt-upload`, {
+  //   method: 'POST',
+  //   body: formData,
+  // });
+  // if (!response.ok) throw new Error('Failed to upload receipt');
+  // return true;
   
-  if (requestIndex === -1) {
-    return undefined;
-  }
-  
-  // Clone the request
-  const updatedRequest = { ...mockRequests[requestIndex] };
-  
-  // Update receipt status
-  updatedRequest.hasUploadedReceipt = true;
-  updatedRequest.updatedAt = new Date().toISOString();
-  
-  // Update the request in the mock database
-  mockRequests[requestIndex] = updatedRequest;
-  
-  return updatedRequest;
+  // Temporary: Return success until API is implemented
+  return true;
 };
 
 // Search requests
 export const searchRequests = async (query: string): Promise<DocumentRequest[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/search?q=${encodeURIComponent(query)}`);
+  // if (!response.ok) throw new Error('Failed to search requests');
+  // return await response.json();
   
-  // Convert query to lowercase for case-insensitive search
-  const lowerQuery = query.toLowerCase();
-  
-  // Search in various fields
-  return mockRequests.filter(request => 
-    request.id.toLowerCase().includes(lowerQuery) ||
-    request.documentTypeName.toLowerCase().includes(lowerQuery) ||
-    request.purpose.toLowerCase().includes(lowerQuery) ||
-    (request.additionalDetails && request.additionalDetails.toLowerCase().includes(lowerQuery)) ||
-    request.status.toLowerCase().includes(lowerQuery)
-  );
+  // Temporary: Return empty array until API is implemented
+  return [];
 };
 
 // Get statistics for dashboard
@@ -499,15 +240,19 @@ export const getRequestStatistics = async (): Promise<{
   completed: number;
   rejected: number;
 }> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 700));
+  // In a real implementation, this would call your API
+  // For example:
+  // const response = await fetch(`${API_BASE_URL}/requests/statistics`);
+  // if (!response.ok) throw new Error('Failed to fetch statistics');
+  // return await response.json();
   
+  // Temporary: Return placeholder statistics until API is implemented
   return {
-    total: mockRequests.length,
-    pending: mockRequests.filter(r => r.status === 'Pending').length,
-    processing: mockRequests.filter(r => r.status === 'Processing').length,
-    approved: mockRequests.filter(r => r.status === 'Approved').length,
-    completed: mockRequests.filter(r => r.status === 'Completed').length,
-    rejected: mockRequests.filter(r => r.status === 'Rejected').length,
+    total: 0,
+    pending: 0,
+    processing: 0,
+    approved: 0,
+    completed: 0,
+    rejected: 0,
   };
 };
