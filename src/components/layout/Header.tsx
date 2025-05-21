@@ -67,7 +67,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                   {user ? getInitials(user.name) : "U"}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden md:inline-block font-medium text-sm">
+              <span className="hidden md:inline-block font-medium text-sm cursor-pointer">
                 {user?.name}
               </span>
             </Button>
@@ -80,8 +80,12 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">Settings</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/dashboard/profile")}>
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/dashboard/settings")}>
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer text-red-500" onClick={handleLogout}>
               Logout

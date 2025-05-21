@@ -20,6 +20,7 @@ import Search from "./pages/Search";
 import Users from "./pages/Users";
 import Backup from "./pages/Backup";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/dashboard/users" element={<Users />} />
               <Route path="/dashboard/backup" element={<Backup />} />
               <Route path="/dashboard/settings" element={<Settings />} />
+              <Route path="/dashboard/profile" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
