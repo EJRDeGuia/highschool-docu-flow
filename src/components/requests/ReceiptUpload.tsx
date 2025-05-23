@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationsContext";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader, Upload, FileCheck } from "lucide-react";
+import { Loader, Upload, FileCheck, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markReceiptUploaded } from "../../services/requestService";
 
@@ -26,8 +26,10 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
@@ -43,7 +45,9 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
+    // Validate all required data is present
     if (!file) {
       toast({
         title: "Error",
@@ -63,9 +67,10 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
     }
     
     if (!requestId) {
+      setError("No request ID provided. Please go back and try again.");
       toast({
         title: "Error",
-        description: "No request ID provided",
+        description: "No request ID provided. Please try again from My Requests page.",
         variant: "destructive"
       });
       return;
@@ -74,9 +79,13 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
     setIsUploading(true);
     
     try {
+      console.log("Starting upload for requestId:", requestId);
+      
       // Create unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}-${requestId}.${fileExt}`;
+      
+      console.log("Uploading to receipts bucket with filename:", fileName);
       
       // Upload file to Supabase storage
       const { data, error } = await supabase.storage
@@ -116,12 +125,14 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
         navigate("/dashboard/my-requests");
       }, 2000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading receipt:", error);
+      
+      setError(error.message || "Upload failed");
       
       toast({
         title: "Upload Failed",
-        description: "There was an error uploading your receipt. Please try again.",
+        description: `There was an error uploading your receipt: ${error.message}. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -129,12 +140,49 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
     }
   };
   
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-red-600">Error Uploading Receipt</CardTitle>
+          <CardDescription>
+            We encountered a problem with your receipt upload.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-red-50 border border-red-100 rounded-md p-4 flex items-center gap-3">
+            <AlertCircle className="h-6 w-6 text-red-500" />
+            <div>
+              <h4 className="font-medium text-red-800">Upload Failed</h4>
+              <p className="text-red-700 text-sm">
+                {error}
+              </p>
+              <p className="text-red-700 text-sm mt-2">
+                Please go back to your requests and try again.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/dashboard/my-requests")}
+          >
+            Return to My Requests
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle>Upload Payment Receipt</CardTitle>
         <CardDescription>
           Please upload a screenshot or photo of your payment receipt to confirm your transaction.
+          {requestId && <span className="block text-xs mt-1 text-gray-500">Request ID: {requestId}</span>}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -178,10 +226,18 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
             </div>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => navigate("/dashboard/my-requests")}
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
-            className="w-full"
+            className="w-full sm:w-auto"
             disabled={!file || isUploading || uploadComplete}
           >
             {isUploading ? (

@@ -103,6 +103,7 @@ const MyRequests = () => {
     if (event) {
       event.stopPropagation();
     }
+    console.log("Navigating to receipt upload with requestId:", requestId);
     navigate(`/dashboard/receipt-upload?requestId=${requestId}`);
   };
 

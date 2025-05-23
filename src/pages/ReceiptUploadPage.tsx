@@ -1,14 +1,16 @@
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import ReceiptUpload from "../components/requests/ReceiptUpload";
 import { getRequestById } from "../services/requestService";
 import { DocumentRequest } from "../services/requestService";
+import { Loader } from "lucide-react";
 
 const ReceiptUploadPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [request, setRequest] = useState<DocumentRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -20,22 +22,37 @@ const ReceiptUploadPage = () => {
         setIsLoading(false);
         toast({
           title: "Error",
-          description: "No request ID provided",
+          description: "No request ID provided. Please try again.",
           variant: "destructive",
         });
+        
+        // Redirect back to my requests after a short delay
+        setTimeout(() => {
+          navigate("/dashboard/my-requests");
+        }, 3000);
+        
         return;
       }
 
+      console.log("Fetching request with ID:", requestId);
+      
       try {
         const requestData = await getRequestById(requestId);
         if (requestData) {
+          console.log("Request data fetched:", requestData);
           setRequest(requestData);
         } else {
+          console.error("Request not found for ID:", requestId);
           toast({
             title: "Error",
             description: "Request not found",
             variant: "destructive",
           });
+          
+          // Redirect back to my requests after a short delay
+          setTimeout(() => {
+            navigate("/dashboard/my-requests");
+          }, 3000);
         }
       } catch (error) {
         console.error("Error fetching request:", error);
@@ -50,7 +67,17 @@ const ReceiptUploadPage = () => {
     };
 
     fetchRequest();
-  }, [requestId, toast]);
+  }, [requestId, toast, navigate]);
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
