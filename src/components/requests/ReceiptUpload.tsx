@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationsContext";
@@ -9,6 +9,8 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader, Upload, FileCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { markReceiptUploaded } from "../../services/requestService";
 
 const ReceiptUpload = () => {
   const { user } = useAuth();
@@ -20,6 +22,16 @@ const ReceiptUpload = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  
+  // Get the request ID from URL search params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('requestId');
+    if (id) {
+      setRequestId(id);
+    }
+  }, []);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -47,11 +59,56 @@ const ReceiptUpload = () => {
       return;
     }
     
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to upload a receipt",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!requestId) {
+      toast({
+        title: "Error",
+        description: "No request ID provided",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsUploading(true);
     
     try {
-      // Simulate file upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}-${requestId}.${fileExt}`;
+      
+      // Check if receipts bucket exists, if not create it
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const receiptsBucket = buckets?.find(bucket => bucket.name === 'receipts');
+      
+      if (!receiptsBucket) {
+        await supabase.storage.createBucket('receipts', {
+          public: false,
+          fileSizeLimit: 5242880 // 5MB
+        });
+      }
+      
+      // Upload file to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('receipts')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Mark receipt as uploaded in the database
+      await markReceiptUploaded(requestId);
       
       // Add notification
       addNotification({
@@ -68,7 +125,7 @@ const ReceiptUpload = () => {
       
       setUploadComplete(true);
       
-      // Simulate processing
+      // Redirect after a short delay
       setTimeout(() => {
         navigate("/dashboard/my-requests");
       }, 2000);

@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -53,7 +54,7 @@ const RequestForm = () => {
   const [documentTypes, setDocumentTypes] = useState<{ id: string; name: string; fee: number }[]>([]);
   
   // Fetch document types from database
-  useState(() => {
+  useEffect(() => {
     const fetchDocumentTypes = async () => {
       const { data, error } = await supabase
         .from('document_types')
@@ -79,7 +80,7 @@ const RequestForm = () => {
     };
     
     fetchDocumentTypes();
-  });
+  }, [toast]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -333,26 +334,17 @@ const RequestForm = () => {
               </div>
               
               <div className="flex flex-col items-center">
-                <p className="text-center mb-4">Scan the QR code below to pay via GCash</p>
+                <p className="text-center mb-4">Scan the QR code below to pay via InstaPay</p>
                 <div className="bg-white p-4 rounded-md border border-gray-200">
-                  {/* Simulated GCash QR code */}
-                  <div className="w-48 h-48 bg-gray-200 flex items-center justify-center">
-                    <div className="w-40 h-40 border-8 border-blue-500 relative">
-                      <div className="absolute inset-0 grid grid-cols-5 grid-rows-5">
-                        {Array.from({ length: 25 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`${
-                              Math.random() > 0.5 ? "bg-blue-500" : "bg-white"
-                            }`}
-                          ></div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  {/* Real InstaPay QR code */}
+                  <img 
+                    src="/lovable-uploads/3b093e83-c96b-4906-b53b-a048b47c09df.png" 
+                    alt="InstaPay QR code" 
+                    className="w-48 h-48 object-contain"
+                  />
                 </div>
                 <p className="text-sm text-muted-foreground mt-4">
-                  Reference No: {Math.random().toString(36).substring(2, 10).toUpperCase()}
+                  Reference No: REQ-{Math.random().toString(36).substring(2, 8).toUpperCase()}
                 </p>
               </div>
             </CardContent>
@@ -360,7 +352,7 @@ const RequestForm = () => {
               <Button
                 className="w-full"
                 onClick={() => {
-                  navigate("/dashboard/receipt-upload");
+                  navigate(`/dashboard/receipt-upload?requestId=${form.getValues("documentType")}`);
                 }}
               >
                 I've Paid - Upload Receipt

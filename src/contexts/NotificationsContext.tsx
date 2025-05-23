@@ -1,5 +1,6 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Notification {
   id: string;
@@ -98,29 +99,4 @@ export const useNotifications = () => {
     throw new Error('useNotifications must be used within a NotificationsProvider');
   }
   return context;
-};
-
-// Demo notifications for testing
-export const addDemoNotifications = (add: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void) => {
-  add({
-    title: 'New document request',
-    message: 'Your request for a transcript has been received',
-    type: 'info',
-  });
-  
-  setTimeout(() => {
-    add({
-      title: 'Request approved',
-      message: 'Your transcript request has been approved',
-      type: 'success',
-    });
-  }, 2000);
-  
-  setTimeout(() => {
-    add({
-      title: 'Payment required',
-      message: 'Please complete payment for your transcript',
-      type: 'warning',
-    });
-  }, 4000);
 };
