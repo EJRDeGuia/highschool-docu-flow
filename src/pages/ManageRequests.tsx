@@ -31,7 +31,7 @@ import StatusBadge from "../components/shared/StatusBadge";
 import { useNavigate } from "react-router-dom";
 
 const ManageRequests = () => {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const { addNotification } = useNotifications();
   const { toast } = useToast();
   const [requests, setRequests] = useState<DocumentRequest[]>([]);
@@ -47,8 +47,8 @@ const ManageRequests = () => {
   const [actionNote, setActionNote] = useState("");
   const navigate = useNavigate();
 
-  // Check if user can approve/reject requests (only registrars)
-  const canManageRequests = user?.role === 'registrar';
+  // Check if user can approve/reject requests (registrars and admins)
+  const canManageRequests = hasPermission(['registrar', 'admin']);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -111,7 +111,7 @@ const ManageRequests = () => {
   };
 
   const handleActionClick = (type: "approve" | "reject" | "complete") => {
-    // Only registrars can perform these actions
+    // Only registrars and admins can perform these actions
     if (!canManageRequests) {
       toast({
         title: "Access Denied",

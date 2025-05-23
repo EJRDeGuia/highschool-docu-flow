@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth, UserRole } from "@/contexts/AuthContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 
 // Pages
@@ -22,15 +22,21 @@ import Backup from "./pages/Backup";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 
-// Route protection component for admin-only routes
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+// Route protection component that requires specific roles
+const RoleBasedRoute = ({ 
+  children, 
+  allowedRoles 
+}: { 
+  children: React.ReactNode;
+  allowedRoles: UserRole[];
+}) => {
+  const { user, hasPermission } = useAuth();
   
   if (!user) {
     return <Navigate to="/login" replace />;
   }
   
-  if (user.role !== 'admin') {
+  if (!hasPermission(allowedRoles)) {
     return <Navigate to="/dashboard" replace />;
   }
   
@@ -56,19 +62,37 @@ const AppRoutes = () => {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       
-      {/* Protected routes */}
+      {/* Protected routes for all authenticated users */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/dashboard/my-requests" element={<ProtectedRoute><MyRequests /></ProtectedRoute>} />
-      <Route path="/dashboard/new-request" element={<ProtectedRoute><NewRequest /></ProtectedRoute>} />
-      <Route path="/dashboard/upload-receipt" element={<ProtectedRoute><ReceiptUploadPage /></ProtectedRoute>} />
       <Route path="/dashboard/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       
+      {/* Student-specific routes */}
+      <Route path="/dashboard/my-requests" element={
+        <RoleBasedRoute allowedRoles={['student']}><MyRequests /></RoleBasedRoute>
+      } />
+      <Route path="/dashboard/new-request" element={
+        <RoleBasedRoute allowedRoles={['student']}><NewRequest /></RoleBasedRoute>
+      } />
+      <Route path="/dashboard/upload-receipt" element={<ProtectedRoute><ReceiptUploadPage /></ProtectedRoute>} />
+      
+      {/* Registrar and admin routes */}
+      <Route path="/dashboard/manage-requests" element={
+        <RoleBasedRoute allowedRoles={['registrar', 'admin']}><ManageRequests /></RoleBasedRoute>
+      } />
+      
       {/* Admin-only routes */}
-      <Route path="/dashboard/manage-requests" element={<AdminRoute><ManageRequests /></AdminRoute>} />
-      <Route path="/dashboard/search" element={<AdminRoute><Search /></AdminRoute>} />
-      <Route path="/dashboard/users" element={<AdminRoute><Users /></AdminRoute>} />
-      <Route path="/dashboard/backup" element={<AdminRoute><Backup /></AdminRoute>} />
-      <Route path="/dashboard/settings" element={<AdminRoute><Settings /></AdminRoute>} />
+      <Route path="/dashboard/search" element={
+        <RoleBasedRoute allowedRoles={['admin']}><Search /></RoleBasedRoute>
+      } />
+      <Route path="/dashboard/users" element={
+        <RoleBasedRoute allowedRoles={['admin']}><Users /></RoleBasedRoute>
+      } />
+      <Route path="/dashboard/backup" element={
+        <RoleBasedRoute allowedRoles={['admin']}><Backup /></RoleBasedRoute>
+      } />
+      <Route path="/dashboard/settings" element={
+        <RoleBasedRoute allowedRoles={['admin']}><Settings /></RoleBasedRoute>
+      } />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

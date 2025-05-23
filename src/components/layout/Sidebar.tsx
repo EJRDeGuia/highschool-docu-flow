@@ -1,6 +1,6 @@
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth, UserRole } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { 
@@ -15,16 +15,14 @@ import {
   Users,
   Database,
   Receipt,
-  X
+  X,
+  Check
 } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
-
-// Define the user role type
-type UserRole = "student" | "registrar" | "admin";
 
 // Define the navigation item type for better type safety
 interface NavItem {
@@ -35,7 +33,7 @@ interface NavItem {
 }
 
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   
@@ -62,7 +60,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
     {
       name: "Manage Requests",
       href: "/dashboard/manage-requests",
-      icon: ClipboardList,
+      icon: Check,
       roles: ["registrar", "admin"],
     },
     {
