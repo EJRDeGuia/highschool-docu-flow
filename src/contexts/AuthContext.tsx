@@ -1,4 +1,6 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the user roles
 export type UserRole = 'student' | 'registrar' | 'admin';
@@ -24,32 +26,6 @@ interface AuthContextType {
 // Create the auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Sample users for demonstration
-const DEMO_USERS: User[] = [
-  {
-    id: '1',
-    name: 'Student User',
-    email: 'student@school.edu',
-    role: 'student',
-    studentId: '2023-1234',
-    avatar: '/placeholder.svg',
-  },
-  {
-    id: '2',
-    name: 'Registrar User',
-    email: 'registrar@school.edu',
-    role: 'registrar',
-    avatar: '/placeholder.svg',
-  },
-  {
-    id: '3',
-    name: 'Admin User',
-    email: 'admin@school.edu',
-    role: 'admin',
-    avatar: '/placeholder.svg',
-  },
-];
-
 // Create the auth provider
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -68,21 +44,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Find user with matching email
-    const foundUser = DEMO_USERS.find(user => user.email === email);
-    
-    if (foundUser && password === 'password') {
-      // For demonstration, any password works as 'password'
-      setUser(foundUser);
-      localStorage.setItem('user', JSON.stringify(foundUser));
-    } else {
+    try {
+      // Fetch user from Supabase database
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
+      
+      if (error) {
+        throw new Error('User not found');
+      }
+      
+      // For demo purposes, we're not doing real password validation
+      if (password !== 'password') {
+        throw new Error('Invalid password');
+      }
+      
+      // Format the user object to match our User interface
+      const loggedInUser: User = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        role: data.role as UserRole,
+        studentId: data.student_id || undefined,
+        avatar: data.avatar || '/placeholder.svg',
+      };
+      
+      setUser(loggedInUser);
+      localStorage.setItem('user', JSON.stringify(loggedInUser));
+    } catch (error) {
+      console.error("Login error:", error);
       throw new Error('Invalid email or password');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   // Logout function

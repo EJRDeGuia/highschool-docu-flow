@@ -9,7 +9,155 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      document_requests: {
+        Row: {
+          additional_details: string | null
+          copies: number
+          created_at: string
+          document_type_id: string
+          fee: number
+          has_paid: boolean
+          has_uploaded_receipt: boolean
+          id: string
+          purpose: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_details?: string | null
+          copies?: number
+          created_at?: string
+          document_type_id: string
+          fee: number
+          has_paid?: boolean
+          has_uploaded_receipt?: boolean
+          id?: string
+          purpose: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_details?: string | null
+          copies?: number
+          created_at?: string
+          document_type_id?: string
+          fee?: number
+          has_paid?: boolean
+          has_uploaded_receipt?: boolean
+          id?: string
+          purpose?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_requests_document_type_id_fkey"
+            columns: ["document_type_id"]
+            isOneToOne: false
+            referencedRelation: "document_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_types: {
+        Row: {
+          base_fee: number
+          description: string | null
+          id: string
+          name: string
+          processing_days: number
+        }
+        Insert: {
+          base_fee?: number
+          description?: string | null
+          id?: string
+          name: string
+          processing_days?: number
+        }
+        Update: {
+          base_fee?: number
+          description?: string | null
+          id?: string
+          name?: string
+          processing_days?: number
+        }
+        Relationships: []
+      }
+      request_timeline: {
+        Row: {
+          date: string | null
+          id: string
+          note: string | null
+          request_id: string
+          status: string
+          step: string
+        }
+        Insert: {
+          date?: string | null
+          id?: string
+          note?: string | null
+          request_id: string
+          status: string
+          step: string
+        }
+        Update: {
+          date?: string | null
+          id?: string
+          note?: string | null
+          request_id?: string
+          status?: string
+          step?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_timeline_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "document_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: string
+          student_id: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role: string
+          student_id?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          student_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
