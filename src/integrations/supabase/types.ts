@@ -93,6 +93,41 @@ export type Database = {
         }
         Relationships: []
       }
+      receipt_uploads: {
+        Row: {
+          file_data: string
+          filename: string
+          id: string
+          request_id: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          file_data: string
+          filename: string
+          id?: string
+          request_id: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          file_data?: string
+          filename?: string
+          id?: string
+          request_id?: string
+          uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_uploads_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "document_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       request_timeline: {
         Row: {
           date: string | null

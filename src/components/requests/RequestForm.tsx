@@ -150,8 +150,8 @@ const RequestForm = () => {
     return 0;
   };
 
-  const handleUploadReceipt = () => {
-    // Navigate to the receipt upload page with the request ID
+  // Direct upload navigation without the "I've Paid" button
+  const handleContinue = () => {
     if (createdRequestId) {
       navigate(`/dashboard/upload-receipt?requestId=${createdRequestId}`);
     } else {
@@ -304,9 +304,9 @@ const RequestForm = () => {
             <CardFooter className="flex flex-col space-y-2">
               <Button 
                 className="w-full" 
-                onClick={handleUploadReceipt}
+                onClick={handleContinue}
               >
-                I've Paid - Upload Receipt
+                Continue to Upload Receipt
               </Button>
               <Button variant="outline" className="w-full" onClick={() => setShowPaymentModal(false)}>Close</Button>
             </CardFooter>

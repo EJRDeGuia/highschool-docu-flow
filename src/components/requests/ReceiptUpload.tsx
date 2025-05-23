@@ -82,31 +82,34 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       console.log("Starting upload for requestId:", requestId);
       console.log("Current authenticated user:", user.id);
       
-      // Create unique filename with user ID as the first path segment
-      const fileExt = file.name.split('.').pop();
+      // Read file as base64
+      const reader = new FileReader();
+      const fileDataPromise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       
-      // CRITICAL: This format MUST match the RLS policy exactly
-      // The folder structure needs to be: user_id/filename
-      const filePath = `${user.id}/${requestId}-${Date.now()}.${fileExt}`;
+      const fileData = await fileDataPromise;
       
-      console.log("Uploading to receipts bucket with filepath:", filePath);
-      
-      // Upload file to Supabase storage
-      const { data, error } = await supabase.storage
-        .from('receipts')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+      // Store file data directly in the receipt_uploads table
+      const { data, error: uploadError } = await supabase
+        .from('receipt_uploads')
+        .insert({
+          request_id: requestId,
+          user_id: user.id,
+          file_data: fileData,
+          filename: file.name
         });
       
-      if (error) {
-        console.error("Storage upload error:", error);
-        throw new Error(`Storage upload failed: ${error.message}`);
+      if (uploadError) {
+        console.error("Database upload error:", uploadError);
+        throw new Error(`Receipt upload failed: ${uploadError.message}`);
       }
       
-      console.log("Upload successful:", data);
+      console.log("Upload successful to receipt_uploads table");
       
-      // Mark receipt as uploaded in the database
+      // Mark receipt as uploaded in the document_requests table
       const updatedRequest = await markReceiptUploaded(requestId);
       
       if (!updatedRequest) {
