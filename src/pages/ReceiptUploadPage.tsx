@@ -18,6 +18,11 @@ const ReceiptUploadPage = () => {
     const fetchRequest = async () => {
       if (!requestId) {
         setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "No request ID provided",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -25,6 +30,12 @@ const ReceiptUploadPage = () => {
         const requestData = await getRequestById(requestId);
         if (requestData) {
           setRequest(requestData);
+        } else {
+          toast({
+            title: "Error",
+            description: "Request not found",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error fetching request:", error);
@@ -55,7 +66,7 @@ const ReceiptUploadPage = () => {
         )}
       </div>
       
-      <ReceiptUpload />
+      <ReceiptUpload requestId={requestId} />
     </DashboardLayout>
   );
 };

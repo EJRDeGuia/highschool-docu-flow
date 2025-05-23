@@ -99,6 +99,13 @@ const MyRequests = () => {
     navigate("/dashboard/new-request");
   };
 
+  const handlePayNow = (requestId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    navigate(`/dashboard/receipt-upload?requestId=${requestId}`);
+  };
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
@@ -177,11 +184,8 @@ const MyRequests = () => {
                   <div className="flex flex-col items-end gap-2">
                     <StatusBadge status={request.status} />
                     
-                    {!request.hasPaid && (
-                      <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => {
-                        e.stopPropagation();
-                        navigate("/dashboard/receipt-upload");
-                      }}>
+                    {!request.hasUploadedReceipt && !request.hasPaid && (
+                      <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => handlePayNow(request.id, e)}>
                         <Upload className="mr-1 h-3 w-3" />
                         Pay Now
                       </Button>
@@ -288,12 +292,9 @@ const MyRequests = () => {
                 </div>
                 
                 <div className="flex justify-end gap-3 mt-4">
-                  {!selectedRequest.hasPaid && (
+                  {!selectedRequest.hasUploadedReceipt && !selectedRequest.hasPaid && (
                     <Button 
-                      onClick={() => {
-                        closeRequestDetails();
-                        navigate("/dashboard/receipt-upload");
-                      }}
+                      onClick={() => handlePayNow(selectedRequest.id)}
                     >
                       <Upload className="mr-2 h-4 w-4" />
                       Pay Now

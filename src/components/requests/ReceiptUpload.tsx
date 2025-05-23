@@ -12,7 +12,11 @@ import { Loader, Upload, FileCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markReceiptUploaded } from "../../services/requestService";
 
-const ReceiptUpload = () => {
+interface ReceiptUploadProps {
+  requestId: string | null;
+}
+
+const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
   const { toast } = useToast();
@@ -22,16 +26,6 @@ const ReceiptUpload = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [requestId, setRequestId] = useState<string | null>(null);
-  
-  // Get the request ID from URL search params
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('requestId');
-    if (id) {
-      setRequestId(id);
-    }
-  }, []);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
