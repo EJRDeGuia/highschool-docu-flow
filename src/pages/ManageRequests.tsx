@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotifications } from "../contexts/NotificationsContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { Loader, Search, SlidersHorizontal, X, Check, Clock, AlertCircle } from "lucide-react";
+import { Loader, Search, SlidersHorizontal, X, Check, Clock, AlertCircle, FileText } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { 
   Select,
@@ -312,7 +313,7 @@ const ManageRequests = () => {
       ) : (
         <div className="bg-gray-50 border border-gray-100 rounded-lg p-8 text-center">
           <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <FilePen className="h-8 w-8 text-gray-400" />
+            <FileText className="h-8 w-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-medium mb-2">No requests found</h3>
           <p className="text-gray-500">
