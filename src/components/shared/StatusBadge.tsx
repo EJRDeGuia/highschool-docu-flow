@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Badge } from "../ui/badge";
-import { Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Clock, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type StatusType = "Pending" | "Processing" | "Approved" | "Rejected" | "Completed";
+type StatusType = "Pending" | "Processing" | "Approved" | "Rejected" | "Completed" | "Cancelled";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -22,9 +22,10 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
       case "Completed":
         return <CheckCircle2 className="h-3.5 w-3.5" />;
       case "Rejected":
-        return <AlertCircle className="h-3.5 w-3.5" />;
+      case "Cancelled":
+        return <X className="h-3.5 w-3.5" />;
       default:
-        return null;
+        return <AlertCircle className="h-3.5 w-3.5" />;
     }
   };
 
@@ -33,11 +34,12 @@ const StatusBadge = ({ status, className }: StatusBadgeProps) => {
       variant="outline"
       className={cn(
         "flex items-center gap-1.5 py-1.5 px-2.5 font-medium text-xs rounded-full",
-        status === "Pending" ? "status-pending" : "",
-        status === "Processing" ? "status-processing" : "",
-        status === "Approved" ? "status-approved" : "",
-        status === "Rejected" ? "status-rejected" : "",
-        status === "Completed" ? "status-completed" : "",
+        status === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200" : "",
+        status === "Processing" ? "bg-blue-50 text-blue-700 border-blue-200" : "",
+        status === "Approved" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "",
+        status === "Completed" ? "bg-green-50 text-green-700 border-green-200" : "",
+        status === "Rejected" ? "bg-red-50 text-red-700 border-red-200" : "",
+        status === "Cancelled" ? "bg-gray-50 text-gray-700 border-gray-200" : "",
         className
       )}
     >

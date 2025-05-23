@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -26,6 +27,8 @@ import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { createRequest } from "../../services/requestService";
 
 const formSchema = z.object({
   documentType: z.string({
@@ -35,18 +38,10 @@ const formSchema = z.object({
     message: "Purpose must be at least 5 characters."
   }),
   additionalDetails: z.string().optional(),
-  copies: z.coerce.number().min(1, { // Changed to coerce.number() to handle string to number conversion
+  copies: z.coerce.number().min(1, {
     message: "Number of copies must be at least 1."
   }),
 });
-
-const documentTypes = [
-  { id: "transcript", name: "Transcript of Records", fee: 100 },
-  { id: "certificate", name: "Certificate of Enrollment", fee: 50 },
-  { id: "diploma", name: "Diploma", fee: 200 },
-  { id: "goodMoral", name: "Certificate of Good Moral Character", fee: 50 },
-  { id: "honorable", name: "Certificate of Honorable Dismissal", fee: 75 },
-];
 
 const RequestForm = () => {
   const { user } = useAuth();
@@ -55,7 +50,37 @@ const RequestForm = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<typeof documentTypes[0] | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
+  const [documentTypes, setDocumentTypes] = useState<{ id: string; name: string; fee: number }[]>([]);
+  
+  // Fetch document types from database
+  useState(() => {
+    const fetchDocumentTypes = async () => {
+      const { data, error } = await supabase
+        .from('document_types')
+        .select('id, name, base_fee');
+      
+      if (error) {
+        console.error('Error fetching document types:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load document types. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (data) {
+        setDocumentTypes(data.map(doc => ({
+          id: doc.id,
+          name: doc.name,
+          fee: doc.base_fee
+        })));
+      }
+    };
+    
+    fetchDocumentTypes();
+  }, [toast]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -63,15 +88,24 @@ const RequestForm = () => {
       documentType: "",
       purpose: "",
       additionalDetails: "",
-      copies: 1, // Changed from string "1" to number 1
+      copies: 1,
     },
   });
   
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to submit a request.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      // Find the selected document to get its fee
+      // Find the selected document to get its fee and name
       const docType = documentTypes.find(doc => doc.id === values.documentType);
       
       if (!docType) {
@@ -80,8 +114,16 @@ const RequestForm = () => {
       
       setSelectedDocument(docType);
       
-      // Simulate API request
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create the request in the database
+      const newRequest = await createRequest(
+        user.id,
+        values.documentType,
+        docType.name,
+        values.purpose,
+        values.copies,
+        values.additionalDetails,
+        docType.fee * values.copies
+      );
       
       // Add notification
       addNotification({
@@ -296,13 +338,13 @@ const RequestForm = () => {
                 <div className="bg-white p-4 rounded-md border border-gray-200">
                   {/* Simulated GCash QR code */}
                   <div className="w-48 h-48 bg-gray-200 flex items-center justify-center">
-                    <div className="w-40 h-40 border-8 border-school-primary relative">
+                    <div className="w-40 h-40 border-8 border-blue-500 relative">
                       <div className="absolute inset-0 grid grid-cols-5 grid-rows-5">
                         {Array.from({ length: 25 }).map((_, i) => (
                           <div
                             key={i}
                             className={`${
-                              Math.random() > 0.5 ? "bg-school-primary" : "bg-white"
+                              Math.random() > 0.5 ? "bg-blue-500" : "bg-white"
                             }`}
                           ></div>
                         ))}

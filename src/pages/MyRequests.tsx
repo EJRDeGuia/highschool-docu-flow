@@ -3,15 +3,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import {
-  FilePlus,
-  Loader,
-  Search,
-  SlidersHorizontal,
-  Upload
-} from "lucide-react";
+import { Card, CardContent } from "../components/ui/card";
+import { FilePlus, Loader, Search, SlidersHorizontal, Upload } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { 
   Select,
@@ -25,10 +18,13 @@ import {
 import { DocumentRequest, getUserRequests } from "../services/requestService";
 import { useNavigate } from "react-router-dom";
 import RequestTimeline from "../components/requests/RequestTimeline";
+import StatusBadge from "../components/shared/StatusBadge";
+import { useToast } from "@/hooks/use-toast";
 
 const MyRequests = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [requests, setRequests] = useState<DocumentRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<DocumentRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +43,11 @@ const MyRequests = () => {
           setFilteredRequests(userRequests);
         } catch (error) {
           console.error("Error fetching requests:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load your requests. Please try again.",
+            variant: "destructive",
+          });
         } finally {
           setIsLoading(false);
         }
@@ -54,7 +55,7 @@ const MyRequests = () => {
     };
 
     fetchRequests();
-  }, [user?.id]);
+  }, [user?.id, toast]);
 
   useEffect(() => {
     // Apply filters and search
@@ -152,14 +153,14 @@ const MyRequests = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader className="w-8 h-8 animate-spin text-school-primary" />
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : filteredRequests.length > 0 ? (
         <div className="space-y-4">
           {filteredRequests.map((request) => (
             <Card 
               key={request.id} 
-              className="cursor-pointer hover:border-school-primary transition-colors"
+              className="cursor-pointer hover:border-blue-500 transition-colors"
               onClick={() => handleRequestSelect(request)}
             >
               <CardContent className="p-6">
@@ -174,21 +175,13 @@ const MyRequests = () => {
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <Badge
-                      variant="outline"
-                      className={`
-                        ${request.status === "Pending" ? "status-pending" : ""}
-                        ${request.status === "Processing" ? "status-pending" : ""}
-                        ${request.status === "Approved" ? "status-approved" : ""}
-                        ${request.status === "Rejected" ? "status-rejected" : ""}
-                        ${request.status === "Completed" ? "status-approved" : ""}
-                      `}
-                    >
-                      {request.status}
-                    </Badge>
+                    <StatusBadge status={request.status} />
                     
                     {!request.hasPaid && (
-                      <Button size="sm" variant="outline" className="text-xs h-7">
+                      <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/dashboard/receipt-upload");
+                      }}>
                         <Upload className="mr-1 h-3 w-3" />
                         Pay Now
                       </Button>
@@ -241,19 +234,7 @@ const MyRequests = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
-                    <Badge
-                      variant="outline"
-                      className={`
-                        mt-1
-                        ${selectedRequest.status === "Pending" ? "status-pending" : ""}
-                        ${selectedRequest.status === "Processing" ? "status-pending" : ""}
-                        ${selectedRequest.status === "Approved" ? "status-approved" : ""}
-                        ${selectedRequest.status === "Rejected" ? "status-rejected" : ""}
-                        ${selectedRequest.status === "Completed" ? "status-approved" : ""}
-                      `}
-                    >
-                      {selectedRequest.status}
-                    </Badge>
+                    <StatusBadge status={selectedRequest.status} className="mt-1" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Request Date</p>

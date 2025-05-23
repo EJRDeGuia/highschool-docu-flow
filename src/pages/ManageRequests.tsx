@@ -4,17 +4,7 @@ import { useNotifications } from "../contexts/NotificationsContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import {
-  FilePen,
-  Loader,
-  Search,
-  SlidersHorizontal,
-  X,
-  Check,
-  Clock,
-  AlertCircle
-} from "lucide-react";
+import { Loader, Search, SlidersHorizontal, X, Check, Clock, AlertCircle } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { 
   Select,
@@ -37,6 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { DocumentRequest, getAllRequests, getRequestById, updateRequestStatus } from "../services/requestService";
 import RequestTimeline from "../components/requests/RequestTimeline";
+import StatusBadge from "../components/shared/StatusBadge";
 
 const ManageRequests = () => {
   const { user } = useAuth();
@@ -66,13 +57,18 @@ const ManageRequests = () => {
         setFilteredRequests(allRequests);
       } catch (error) {
         console.error("Error fetching requests:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load requests. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchRequests();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     // Apply filters and search
@@ -138,7 +134,7 @@ const ManageRequests = () => {
       
       switch (actionType) {
         case "approve":
-          newStatus = "Approved";
+          newStatus = selectedRequest.status === "Processing" ? "Approved" : "Processing";
           break;
         case "reject":
           newStatus = "Rejected";
@@ -206,6 +202,11 @@ const ManageRequests = () => {
       }
     } catch (error) {
       console.error("Error refreshing request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh the request details.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -285,18 +286,7 @@ const ManageRequests = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-lg">{request.documentTypeName}</p>
-                      <Badge
-                        variant="outline"
-                        className={`
-                          ${request.status === "Pending" ? "status-pending" : ""}
-                          ${request.status === "Processing" ? "status-pending" : ""}
-                          ${request.status === "Approved" ? "status-approved" : ""}
-                          ${request.status === "Rejected" ? "status-rejected" : ""}
-                          ${request.status === "Completed" ? "status-approved" : ""}
-                        `}
-                      >
-                        {request.status}
-                      </Badge>
+                      <StatusBadge status={request.status} />
                     </div>
                     <p className="text-sm text-gray-500">
                       Request ID: {request.id}
@@ -357,19 +347,7 @@ const ManageRequests = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
-                    <Badge
-                      variant="outline"
-                      className={`
-                        mt-1
-                        ${selectedRequest.status === "Pending" ? "status-pending" : ""}
-                        ${selectedRequest.status === "Processing" ? "status-pending" : ""}
-                        ${selectedRequest.status === "Approved" ? "status-approved" : ""}
-                        ${selectedRequest.status === "Rejected" ? "status-rejected" : ""}
-                        ${selectedRequest.status === "Completed" ? "status-approved" : ""}
-                      `}
-                    >
-                      {selectedRequest.status}
-                    </Badge>
+                    <StatusBadge status={selectedRequest.status} className="mt-1" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Student ID</p>
@@ -512,7 +490,8 @@ const ManageRequests = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === "approve" && "Approve Request"}
+              {actionType === "approve" && selectedRequest?.status === "Pending" && "Process Request"}
+              {actionType === "approve" && selectedRequest?.status === "Processing" && "Approve Request"}
               {actionType === "reject" && "Reject Request"}
               {actionType === "complete" && "Complete Request"}
             </DialogTitle>
