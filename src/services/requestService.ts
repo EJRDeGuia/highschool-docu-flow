@@ -1,4 +1,3 @@
-
 import { User } from "../contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -95,7 +94,7 @@ export const getAllRequests = async (): Promise<DocumentRequest[]> => {
     acc[item.request_id].push({
       id: item.id,
       step: item.step,
-      status: item.status,
+      status: item.status as 'completed' | 'current' | 'pending',
       date: item.date,
       note: item.note
     });
@@ -187,7 +186,7 @@ export const getUserRequests = async (userId: string): Promise<DocumentRequest[]
     acc[item.request_id].push({
       id: item.id,
       step: item.step,
-      status: item.status,
+      status: item.status as 'completed' | 'current' | 'pending',
       date: item.date,
       note: item.note
     });
@@ -283,7 +282,7 @@ export const getRequestById = async (requestId: string): Promise<DocumentRequest
     timeline: (timeline || []).map(item => ({
       id: item.id,
       step: item.step,
-      status: item.status,
+      status: item.status as 'completed' | 'current' | 'pending',
       date: item.date,
       note: item.note
     }))
@@ -315,7 +314,7 @@ export const updateRequestStatus = async (
     .insert({
       request_id: requestId,
       step: `Status changed to ${status}`,
-      status: 'completed',
+      status: 'completed' as 'completed',
       note: note
     });
 
@@ -376,7 +375,7 @@ export const createRequest = async (
     .insert({
       request_id: newRequest.id,
       step: 'Request Submitted',
-      status: 'completed'
+      status: 'completed' as 'completed'
     });
 
   if (timelineError) {
@@ -400,7 +399,7 @@ export const createRequest = async (
     timeline: [{
       id: timelineError ? '1' : 'pending',
       step: 'Request Submitted',
-      status: 'current',
+      status: 'current' as 'current',
       date: new Date().toISOString()
     }]
   };
@@ -427,7 +426,7 @@ export const markRequestAsPaid = async (requestId: string): Promise<DocumentRequ
     .insert({
       request_id: requestId,
       step: 'Payment Received',
-      status: 'completed'
+      status: 'completed' as 'completed'
     });
 
   if (timelineError) {
@@ -459,7 +458,7 @@ export const markReceiptUploaded = async (requestId: string): Promise<DocumentRe
     .insert({
       request_id: requestId,
       step: 'Receipt Uploaded',
-      status: 'completed'
+      status: 'completed' as 'completed'
     });
 
   if (timelineError) {
