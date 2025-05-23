@@ -78,17 +78,6 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}-${requestId}.${fileExt}`;
       
-      // Check if receipts bucket exists, if not create it
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const receiptsBucket = buckets?.find(bucket => bucket.name === 'receipts');
-      
-      if (!receiptsBucket) {
-        await supabase.storage.createBucket('receipts', {
-          public: false,
-          fileSizeLimit: 5242880 // 5MB
-        });
-      }
-      
       // Upload file to Supabase storage
       const { data, error } = await supabase.storage
         .from('receipts')
@@ -98,8 +87,11 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
         });
       
       if (error) {
+        console.error("Storage upload error:", error);
         throw new Error(error.message);
       }
+      
+      console.log("Upload successful:", data);
       
       // Mark receipt as uploaded in the database
       await markReceiptUploaded(requestId);
