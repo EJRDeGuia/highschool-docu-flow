@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationsContext";
@@ -27,6 +27,28 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userChecked, setUserChecked] = useState(false);
+  
+  // Check user authentication on component mount
+  useEffect(() => {
+    const checkUser = async () => {
+      // Ensure user is authenticated
+      if (!user) {
+        console.error("User not authenticated");
+        setError("Authentication error: You must be logged in to upload a receipt.");
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to upload a receipt",
+          variant: "destructive"
+        });
+      } else {
+        console.log("User authenticated:", user.id);
+      }
+      setUserChecked(true);
+    };
+    
+    checkUser();
+  }, [user, toast]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -92,7 +114,10 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       const fileData = await fileDataPromise;
       
-      // Store file data directly in the receipt_uploads table with explicit user_id
+      // Use the authenticated user's ID
+      console.log("Attempting upload with user ID:", user.id);
+      
+      // Store file data directly in the receipt_uploads table
       const { data, error: uploadError } = await supabase
         .from('receipt_uploads')
         .insert({
@@ -150,6 +175,17 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       setIsUploading(false);
     }
   };
+  
+  // Show loading state until user check is complete
+  if (!userChecked) {
+    return (
+      <Card>
+        <CardContent className="pt-6 flex justify-center items-center min-h-[200px]">
+          <Loader className="h-8 w-8 animate-spin text-blue-500" />
+        </CardContent>
+      </Card>
+    );
+  }
   
   if (error) {
     return (
