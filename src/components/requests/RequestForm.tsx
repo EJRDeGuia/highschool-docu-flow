@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -125,7 +126,8 @@ const RequestForm = () => {
         description: "Your document request has been submitted successfully. Redirecting to payment receipt upload..."
       });
 
-      // Direct navigation to upload receipt page
+      // Fix: Use the correct path for upload receipt page
+      console.log("Navigating to receipt upload with requestId:", newRequest.id);
       setTimeout(() => {
         navigate(`/dashboard/upload-receipt?requestId=${newRequest.id}`);
       }, 1500);

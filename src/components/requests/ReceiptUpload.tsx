@@ -82,13 +82,11 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       const fileData = await fileDataPromise;
       
-      // Store file data directly in the receipt_uploads table
-      // RLS is now disabled, so we don't need to worry about user authentication
+      // Fix: Skip user_id to avoid foreign key constraint issues
       const { data, error: uploadError } = await supabase
         .from('receipt_uploads')
         .insert({
           request_id: requestId,
-          user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use a default ID if user is not logged in
           file_data: fileData,
           filename: file.name
         });

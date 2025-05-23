@@ -48,7 +48,7 @@ const AppRoutes = () => {
       <Route path="/dashboard/my-requests" element={<MyRequests />} />
       <Route path="/dashboard/new-request" element={<NewRequest />} />
       <Route path="/dashboard/manage-requests" element={<ManageRequests />} />
-      <Route path="/dashboard/receipt-upload" element={<ReceiptUploadPage />} />
+      <Route path="/dashboard/upload-receipt" element={<ReceiptUploadPage />} />
       <Route path="/dashboard/search" element={<Search />} />
       <Route path="/dashboard/users" element={
         <AdminRoute>
