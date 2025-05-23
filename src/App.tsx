@@ -37,6 +37,17 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Protected route component for regular user authentication
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
@@ -44,28 +55,21 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/dashboard/my-requests" element={<MyRequests />} />
-      <Route path="/dashboard/new-request" element={<NewRequest />} />
-      <Route path="/dashboard/manage-requests" element={<ManageRequests />} />
-      <Route path="/dashboard/upload-receipt" element={<ReceiptUploadPage />} />
-      <Route path="/dashboard/search" element={<Search />} />
-      <Route path="/dashboard/users" element={
-        <AdminRoute>
-          <Users />
-        </AdminRoute>
-      } />
-      <Route path="/dashboard/backup" element={
-        <AdminRoute>
-          <Backup />
-        </AdminRoute>
-      } />
-      <Route path="/dashboard/settings" element={
-        <AdminRoute>
-          <Settings />
-        </AdminRoute>
-      } />
-      <Route path="/dashboard/profile" element={<Profile />} />
+      
+      {/* Protected routes */}
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/dashboard/my-requests" element={<ProtectedRoute><MyRequests /></ProtectedRoute>} />
+      <Route path="/dashboard/new-request" element={<ProtectedRoute><NewRequest /></ProtectedRoute>} />
+      <Route path="/dashboard/upload-receipt" element={<ProtectedRoute><ReceiptUploadPage /></ProtectedRoute>} />
+      <Route path="/dashboard/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      
+      {/* Admin-only routes */}
+      <Route path="/dashboard/manage-requests" element={<AdminRoute><ManageRequests /></AdminRoute>} />
+      <Route path="/dashboard/search" element={<AdminRoute><Search /></AdminRoute>} />
+      <Route path="/dashboard/users" element={<AdminRoute><Users /></AdminRoute>} />
+      <Route path="/dashboard/backup" element={<AdminRoute><Backup /></AdminRoute>} />
+      <Route path="/dashboard/settings" element={<AdminRoute><Settings /></AdminRoute>} />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

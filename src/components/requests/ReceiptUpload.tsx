@@ -83,12 +83,18 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       const fileData = await fileDataPromise;
       
-      // Include the user_id field with a fallback to a default value
+      // Ensure we have a valid user_id - this is critical for the foreign key constraint
+      const userId = user?.id || null;
+      
+      if (!userId) {
+        throw new Error("User authentication is required to upload receipts");
+      }
+      
       const { data, error: uploadError } = await supabase
         .from('receipt_uploads')
         .insert({
           request_id: requestId,
-          user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use default UUID when user is not available
+          user_id: userId,
           file_data: fileData,
           filename: file.name
         });
