@@ -218,75 +218,91 @@ export const getUserRequests = async (userId: string): Promise<DocumentRequest[]
 
 // Get a specific request by ID
 export const getRequestById = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  const { data: request, error: requestError } = await supabase
-    .from('document_requests')
-    .select(`
-      id,
-      user_id,
-      document_type_id,
-      purpose,
-      additional_details,
-      copies,
-      status,
-      created_at,
-      updated_at,
-      fee,
-      has_paid,
-      has_uploaded_receipt
-    `)
-    .eq('id', requestId)
-    .single();
-
-  if (requestError) {
-    console.error('Error fetching request:', requestError);
+  if (!requestId) {
+    console.error('Invalid request ID provided:', requestId);
     return undefined;
   }
 
-  // Fetch document type
-  const { data: docType, error: docTypeError } = await supabase
-    .from('document_types')
-    .select('*')
-    .eq('id', request.document_type_id)
-    .single();
+  try {
+    const { data: request, error: requestError } = await supabase
+      .from('document_requests')
+      .select(`
+        id,
+        user_id,
+        document_type_id,
+        purpose,
+        additional_details,
+        copies,
+        status,
+        created_at,
+        updated_at,
+        fee,
+        has_paid,
+        has_uploaded_receipt
+      `)
+      .eq('id', requestId)
+      .maybeSingle(); // Use maybeSingle instead of single to prevent error when no rows found
 
-  if (docTypeError) {
-    console.error('Error fetching document type:', docTypeError);
+    if (requestError) {
+      console.error('Error fetching request:', requestError);
+      return undefined;
+    }
+
+    // If no request was found, return undefined
+    if (!request) {
+      console.error('No request found with ID:', requestId);
+      return undefined;
+    }
+
+    // Fetch document type
+    const { data: docType, error: docTypeError } = await supabase
+      .from('document_types')
+      .select('*')
+      .eq('id', request.document_type_id)
+      .maybeSingle(); // Use maybeSingle here too
+
+    if (docTypeError) {
+      console.error('Error fetching document type:', docTypeError);
+    }
+
+    // Fetch timeline items
+    const { data: timeline, error: timelineError } = await supabase
+      .from('request_timeline')
+      .select('*')
+      .eq('request_id', requestId)
+      .order('date', { ascending: true });
+
+    if (timelineError) {
+      console.error('Error fetching timeline items:', timelineError);
+    }
+
+    // Transform to DocumentRequest
+    return {
+      id: request.id,
+      userId: request.user_id,
+      documentType: request.document_type_id,
+      documentTypeName: docType?.name || 'Unknown Document Type',
+      purpose: request.purpose,
+      additionalDetails: request.additional_details,
+      copies: request.copies,
+      status: request.status as RequestStatus,
+      createdAt: request.created_at,
+      updatedAt: request.updated_at,
+      fee: request.fee,
+      hasPaid: request.has_paid,
+      hasUploadedReceipt: request.has_uploaded_receipt,
+      timeline: (timeline || []).map(item => ({
+        id: item.id,
+        step: item.step,
+        status: item.status as 'completed' | 'current' | 'pending',
+        date: item.date,
+        note: item.note
+      }))
+    };
+  } catch (error) {
+    console.error('Unexpected error fetching request:', error);
+    return undefined;
   }
-
-  // Fetch timeline items
-  const { data: timeline, error: timelineError } = await supabase
-    .from('request_timeline')
-    .select('*')
-    .eq('request_id', requestId)
-    .order('date', { ascending: true });
-
-  if (timelineError) {
-    console.error('Error fetching timeline items:', timelineError);
-  }
-
-  // Transform to DocumentRequest
-  return {
-    id: request.id,
-    userId: request.user_id,
-    documentType: request.document_type_id,
-    documentTypeName: docType?.name || 'Unknown Document Type',
-    purpose: request.purpose,
-    additionalDetails: request.additional_details,
-    copies: request.copies,
-    status: request.status as RequestStatus,
-    createdAt: request.created_at,
-    updatedAt: request.updated_at,
-    fee: request.fee,
-    hasPaid: request.has_paid,
-    hasUploadedReceipt: request.has_uploaded_receipt,
-    timeline: (timeline || []).map(item => ({
-      id: item.id,
-      step: item.step,
-      status: item.status as 'completed' | 'current' | 'pending',
-      date: item.date,
-      note: item.note
-    }))
-  };
 };
 
 // Update request status

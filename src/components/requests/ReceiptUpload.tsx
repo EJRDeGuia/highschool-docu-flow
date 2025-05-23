@@ -97,13 +97,17 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       if (error) {
         console.error("Storage upload error:", error);
-        throw new Error(error.message);
+        throw new Error(`Storage upload failed: ${error.message}`);
       }
       
       console.log("Upload successful:", data);
       
       // Mark receipt as uploaded in the database
-      await markReceiptUploaded(requestId);
+      const updatedRequest = await markReceiptUploaded(requestId);
+      
+      if (!updatedRequest) {
+        throw new Error("Failed to update request status. The file was uploaded but request status was not updated.");
+      }
       
       // Add notification
       addNotification({
@@ -132,7 +136,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       toast({
         title: "Upload Failed",
-        description: `There was an error uploading your receipt: ${error.message}. Please try again.`,
+        description: `There was an error uploading your receipt: ${error.message || "Unknown error"}. Please try again.`,
         variant: "destructive",
       });
     } finally {
