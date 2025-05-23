@@ -92,7 +92,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       const fileData = await fileDataPromise;
       
-      // Store file data directly in the receipt_uploads table
+      // Store file data directly in the receipt_uploads table with explicit user_id
       const { data, error: uploadError } = await supabase
         .from('receipt_uploads')
         .insert({

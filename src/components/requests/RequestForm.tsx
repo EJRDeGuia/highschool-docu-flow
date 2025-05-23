@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -36,7 +35,6 @@ const RequestForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
   const [documentTypes, setDocumentTypes] = useState<{
     id: string;
@@ -124,11 +122,14 @@ const RequestForm = () => {
       
       toast({
         title: "Request Submitted",
-        description: "Your document request has been submitted successfully"
+        description: "Your document request has been submitted successfully. Redirecting to payment receipt upload..."
       });
 
-      // Show payment modal
-      setShowPaymentModal(true);
+      // Direct navigation to upload receipt page
+      setTimeout(() => {
+        navigate(`/dashboard/upload-receipt?requestId=${newRequest.id}`);
+      }, 1500);
+      
     } catch (error) {
       console.error("Error submitting request:", error);
       toast({
@@ -150,169 +151,134 @@ const RequestForm = () => {
     return 0;
   };
 
-  // Direct upload navigation without the "I've Paid" button
-  const handleContinue = () => {
-    if (createdRequestId) {
-      navigate(`/dashboard/upload-receipt?requestId=${createdRequestId}`);
-    } else {
-      toast({
-        title: "Error",
-        description: "Request ID not found. Please try again.",
-        variant: "destructive"
-      });
-    }
-    setShowPaymentModal(false);
-  };
-
-  return <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Document Request Form</CardTitle>
-          <CardDescription>
-            Fill out the form below to request a document from the registrar's office.
-          </CardDescription>
-        </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              <FormField control={form.control} name="documentType" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Document Type</FormLabel>
-                    <Select onValueChange={value => {
-                field.onChange(value);
-                // Automatically set the document type when selected
-                const docType = documentTypes.find(doc => doc.id === value);
-                if (docType) {
-                  setSelectedDocument(docType);
-                }
-              }} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a document type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {documentTypes.map(doc => <SelectItem key={doc.id} value={doc.id}>
-                            {doc.name} - ₱{doc.fee.toFixed(2)}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>} />
-              
-              <FormField control={form.control} name="copies" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Number of Copies</FormLabel>
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Document Request Form</CardTitle>
+        <CardDescription>
+          Fill out the form below to request a document from the registrar's office.
+        </CardDescription>
+      </CardHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <CardContent className="space-y-4">
+            <FormField 
+              control={form.control} 
+              name="documentType" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Document Type</FormLabel>
+                  <Select 
+                    onValueChange={value => {
+                      field.onChange(value);
+                      // Automatically set the document type when selected
+                      const docType = documentTypes.find(doc => doc.id === value);
+                      if (docType) {
+                        setSelectedDocument(docType);
+                      }
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <Input type="number" min="1" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} value={field.value} />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a document type" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
-              
-              <FormField control={form.control} name="purpose" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Purpose</FormLabel>
-                    <FormControl>
-                      <Input placeholder="E.g., College application, employment, etc." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
-              
-              <FormField control={form.control} name="additionalDetails" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Additional Details (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Any specific requirements or details about your request." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
-              
-              {form.watch("documentType") && <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium text-gray-800">Fee Summary</h3>
-                  <div className="mt-2 space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>Document Fee:</span>
-                      <span>
-                        ₱{selectedDocument?.fee.toFixed(2) || "0.00"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Number of Copies:</span>
-                      <span>
-                        {form.watch("copies") || "1"}
-                      </span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-1 mt-1 flex justify-between font-medium">
-                      <span>Total Fee:</span>
-                      <span>₱{calculateTotalFee().toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>}
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Submit Request
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-      
-      {showPaymentModal && selectedDocument && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Payment Required</CardTitle>
-              <CardDescription>
-                Please pay the fee to proceed with your request.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+                    <SelectContent>
+                      {documentTypes.map(doc => (
+                        <SelectItem key={doc.id} value={doc.id}>
+                          {doc.name} - ₱{doc.fee.toFixed(2)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="copies" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Copies</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      {...field} 
+                      onChange={e => field.onChange(parseInt(e.target.value) || 1)} 
+                      value={field.value} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="purpose" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Purpose</FormLabel>
+                  <FormControl>
+                    <Input placeholder="E.g., College application, employment, etc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            <FormField 
+              control={form.control} 
+              name="additionalDetails" 
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Details (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Any specific requirements or details about your request." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} 
+            />
+            
+            {form.watch("documentType") && (
               <div className="bg-gray-50 p-4 rounded-md">
-                <h3 className="font-medium text-gray-800">Payment Details</h3>
+                <h3 className="font-medium text-gray-800">Fee Summary</h3>
                 <div className="mt-2 space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Document:</span>
-                    <span>{selectedDocument.name}</span>
+                    <span>Document Fee:</span>
+                    <span>
+                      ₱{selectedDocument?.fee.toFixed(2) || "0.00"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Copies:</span>
-                    <span>{form.getValues("copies")}</span>
+                    <span>Number of Copies:</span>
+                    <span>
+                      {form.watch("copies") || "1"}
+                    </span>
                   </div>
                   <div className="border-t border-gray-200 pt-1 mt-1 flex justify-between font-medium">
-                    <span>Total Amount:</span>
+                    <span>Total Fee:</span>
                     <span>₱{calculateTotalFee().toFixed(2)}</span>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex flex-col items-center">
-                <p className="text-center mb-4">Scan the QR code below to pay via InstaPay</p>
-                <div className="bg-white p-4 rounded-md border border-gray-200">
-                  {/* Real InstaPay QR code */}
-                  <img src="/lovable-uploads/3b093e83-c96b-4906-b53b-a048b47c09df.png" alt="InstaPay QR code" className="w-48 h-48 object-contain" />
-                </div>
-                <p className="text-sm text-muted-foreground mt-4">
-                  Reference No: REQ-{Math.random().toString(36).substring(2, 8).toUpperCase()}
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-2">
-              <Button 
-                className="w-full" 
-                onClick={handleContinue}
-              >
-                Continue to Upload Receipt
-              </Button>
-              <Button variant="outline" className="w-full" onClick={() => setShowPaymentModal(false)}>Close</Button>
-            </CardFooter>
-          </Card>
-        </div>}
-    </>;
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Submit Request
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
+    </Card>
+  );
 };
 
 export default RequestForm;
