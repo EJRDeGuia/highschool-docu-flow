@@ -68,10 +68,26 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       return;
     }
     
+    // Check if user is authenticated
+    if (!user || !user.id) {
+      setError("You must be logged in to upload a receipt.");
+      toast({
+        title: "Authentication Error",
+        description: "You need to be logged in to upload a receipt. Please log in and try again.",
+        variant: "destructive"
+      });
+      
+      // Redirect to login
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+      return;
+    }
+    
     setIsUploading(true);
     
     try {
-      console.log("Starting upload for requestId:", requestId);
+      console.log("Starting upload for requestId:", requestId, "userId:", user.id);
       
       // Read file as base64
       const reader = new FileReader();
@@ -83,18 +99,12 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       const fileData = await fileDataPromise;
       
-      // Ensure we have a valid user_id - this is critical for the foreign key constraint
-      const userId = user?.id || null;
-      
-      if (!userId) {
-        throw new Error("User authentication is required to upload receipts");
-      }
-      
+      // Insert the receipt data with the correct user ID
       const { data, error: uploadError } = await supabase
         .from('receipt_uploads')
         .insert({
           request_id: requestId,
-          user_id: userId,
+          user_id: user.id,
           file_data: fileData,
           filename: file.name
         });
