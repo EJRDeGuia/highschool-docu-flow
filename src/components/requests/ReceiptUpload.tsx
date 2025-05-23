@@ -83,14 +83,15 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       // Create unique filename with user ID as the folder name
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${requestId}-${Date.now()}.${fileExt}`;
+      // This format must match the RLS policy: user.id as the first folder segment
+      const filePath = `${user.id}/${requestId}-${Date.now()}.${fileExt}`;
       
-      console.log("Uploading to receipts bucket with filename:", fileName);
+      console.log("Uploading to receipts bucket with filepath:", filePath);
       
       // Upload file to Supabase storage
       const { data, error } = await supabase.storage
         .from('receipts')
-        .upload(fileName, file, {
+        .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
         });
@@ -268,3 +269,4 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
 };
 
 export default ReceiptUpload;
+
