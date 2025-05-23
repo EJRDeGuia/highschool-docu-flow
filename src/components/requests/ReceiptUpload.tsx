@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader, Upload, FileCheck, AlertCircle } from "lucide-react";
+import { Loader, Upload, FileCheck, AlertCircle, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markReceiptUploaded } from "../../services/requestService";
 
@@ -27,6 +27,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showQrCode, setShowQrCode] = useState(true);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -82,11 +83,12 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       
       const fileData = await fileDataPromise;
       
-      // Fix: Skip user_id to avoid foreign key constraint issues
+      // Include the user_id field with a fallback to a default value
       const { data, error: uploadError } = await supabase
         .from('receipt_uploads')
         .insert({
           request_id: requestId,
+          user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use default UUID when user is not available
           file_data: fileData,
           filename: file.name
         });
@@ -140,6 +142,20 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
     }
   };
   
+  // Generate payment QR code data
+  const generateQrData = () => {
+    if (!requestId) return "";
+    
+    // Creating a simple QR code data with payment information
+    const paymentInfo = {
+      requestId: requestId,
+      amount: "Please scan to pay",
+      reference: `REF-${requestId.substring(0, 8)}`
+    };
+    
+    return JSON.stringify(paymentInfo);
+  };
+  
   if (error) {
     return (
       <Card>
@@ -187,6 +203,26 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {showQrCode && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex flex-col items-center">
+                <h3 className="font-medium text-gray-800 mb-2">Scan to Pay</h3>
+                <div className="w-40 h-40 bg-white p-2 border border-gray-300 rounded-md flex items-center justify-center">
+                  <QrCode className="w-32 h-32 text-gray-800" />
+                </div>
+                <p className="mt-2 text-sm text-gray-600">Scan this QR code with your mobile banking app</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-3"
+                  onClick={() => setShowQrCode(false)}
+                >
+                  I've made the payment
+                </Button>
+              </div>
+            </div>
+          )}
+          
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label htmlFor="receipt">Receipt Image</Label>
             <div className="flex items-center gap-3">

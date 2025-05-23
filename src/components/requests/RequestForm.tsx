@@ -126,7 +126,7 @@ const RequestForm = () => {
         description: "Your document request has been submitted successfully. Redirecting to payment receipt upload..."
       });
 
-      // Fix: Use the correct path for upload receipt page
+      // Ensure we navigate to the correct path with the request ID
       console.log("Navigating to receipt upload with requestId:", newRequest.id);
       setTimeout(() => {
         navigate(`/dashboard/upload-receipt?requestId=${newRequest.id}`);
