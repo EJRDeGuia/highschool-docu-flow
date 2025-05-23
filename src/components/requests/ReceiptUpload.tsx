@@ -80,10 +80,13 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
     
     try {
       console.log("Starting upload for requestId:", requestId);
+      console.log("Current authenticated user:", user.id);
       
-      // Create unique filename with user ID as the folder name
+      // Create unique filename with user ID as the first path segment
       const fileExt = file.name.split('.').pop();
-      // This format must match the RLS policy: user.id as the first folder segment
+      
+      // CRITICAL: This format MUST match the RLS policy exactly
+      // The folder structure needs to be: user_id/filename
       const filePath = `${user.id}/${requestId}-${Date.now()}.${fileExt}`;
       
       console.log("Uploading to receipts bucket with filepath:", filePath);
@@ -269,4 +272,3 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
 };
 
 export default ReceiptUpload;
-
