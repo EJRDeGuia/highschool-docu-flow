@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -15,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createRequest } from "../../services/requestService";
+
 const formSchema = z.object({
   documentType: z.string({
     required_error: "Please select a document type."
@@ -27,16 +29,11 @@ const formSchema = z.object({
     message: "Number of copies must be at least 1."
   })
 });
+
 const RequestForm = () => {
-  const {
-    user
-  } = useAuth();
-  const {
-    addNotification
-  } = useNotifications();
-  const {
-    toast
-  } = useToast();
+  const { user } = useAuth();
+  const { addNotification } = useNotifications();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -46,14 +43,13 @@ const RequestForm = () => {
     name: string;
     fee: number;
   }[]>([]);
+  const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
 
   // Fetch document types from database
   useEffect(() => {
     const fetchDocumentTypes = async () => {
-      const {
-        data,
-        error
-      } = await supabase.from('document_types').select('id, name, base_fee');
+      const { data, error } = await supabase.from('document_types').select('id, name, base_fee');
+      
       if (error) {
         console.error('Error fetching document types:', error);
         toast({
@@ -63,6 +59,7 @@ const RequestForm = () => {
         });
         return;
       }
+      
       if (data) {
         setDocumentTypes(data.map(doc => ({
           id: doc.id,
@@ -71,8 +68,10 @@ const RequestForm = () => {
         })));
       }
     };
+    
     fetchDocumentTypes();
   }, [toast]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -82,6 +81,7 @@ const RequestForm = () => {
       copies: 1
     }
   });
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user) {
       toast({
@@ -91,6 +91,7 @@ const RequestForm = () => {
       });
       return;
     }
+
     setIsSubmitting(true);
     try {
       // Find the selected document to get its fee and name
@@ -101,7 +102,18 @@ const RequestForm = () => {
       setSelectedDocument(docType);
 
       // Create the request in the database
-      const newRequest = await createRequest(user.id, values.documentType, docType.name, values.purpose, values.copies, values.additionalDetails, docType.fee * values.copies);
+      const newRequest = await createRequest(
+        user.id, 
+        values.documentType, 
+        docType.name, 
+        values.purpose, 
+        values.copies, 
+        values.additionalDetails, 
+        docType.fee * values.copies
+      );
+
+      // Store the created request ID
+      setCreatedRequestId(newRequest.id);
 
       // Add notification
       addNotification({
@@ -109,6 +121,7 @@ const RequestForm = () => {
         message: `Your ${docType.name} request has been submitted successfully.`,
         type: "success"
       });
+      
       toast({
         title: "Request Submitted",
         description: "Your document request has been submitted successfully"
@@ -127,6 +140,7 @@ const RequestForm = () => {
       setIsSubmitting(false);
     }
   };
+
   const calculateTotalFee = () => {
     const docType = documentTypes.find(doc => doc.id === form.watch("documentType"));
     const copies = form.watch("copies") || 1;
@@ -135,6 +149,21 @@ const RequestForm = () => {
     }
     return 0;
   };
+
+  const handleUploadReceipt = () => {
+    // Navigate to the receipt upload page with the request ID
+    if (createdRequestId) {
+      navigate(`/dashboard/upload-receipt?requestId=${createdRequestId}`);
+    } else {
+      toast({
+        title: "Error",
+        description: "Request ID not found. Please try again.",
+        variant: "destructive"
+      });
+    }
+    setShowPaymentModal(false);
+  };
+
   return <>
       <Card>
         <CardHeader>
@@ -273,11 +302,17 @@ const RequestForm = () => {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2">
-              
+              <Button 
+                className="w-full" 
+                onClick={handleUploadReceipt}
+              >
+                I've Paid - Upload Receipt
+              </Button>
               <Button variant="outline" className="w-full" onClick={() => setShowPaymentModal(false)}>Close</Button>
             </CardFooter>
           </Card>
         </div>}
     </>;
 };
+
 export default RequestForm;

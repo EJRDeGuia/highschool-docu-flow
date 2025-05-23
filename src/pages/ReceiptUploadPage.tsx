@@ -35,8 +35,9 @@ const ReceiptUploadPage = () => {
       
       try {
         const requestData = await getRequestById(requestId);
+        console.log("Request data returned:", requestData);
+        
         if (requestData) {
-          console.log("Request data fetched:", requestData);
           setRequest(requestData);
         } else {
           console.error("Request not found for ID:", requestId);
@@ -61,7 +62,7 @@ const ReceiptUploadPage = () => {
     };
 
     fetchRequest();
-  }, [requestId, toast, navigate]);
+  }, [requestId, toast]);
 
   if (isLoading) {
     return (

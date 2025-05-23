@@ -81,9 +81,9 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
     try {
       console.log("Starting upload for requestId:", requestId);
       
-      // Create unique filename
+      // Create unique filename with user ID as the folder name
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}-${requestId}.${fileExt}`;
+      const fileName = `${user.id}/${requestId}-${Date.now()}.${fileExt}`;
       
       console.log("Uploading to receipts bucket with filename:", fileName);
       
