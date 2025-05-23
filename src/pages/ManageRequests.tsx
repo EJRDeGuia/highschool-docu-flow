@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotifications } from "../contexts/NotificationsContext";
@@ -104,6 +105,7 @@ const ManageRequests = () => {
 
   const handleRequestSelect = (request: DocumentRequest) => {
     setSelectedRequest(request);
+    console.log("Selected request:", request); // Log request details to help debug
   };
 
   const closeRequestDetails = () => {
@@ -418,16 +420,22 @@ const ManageRequests = () => {
                 
                 <div className="flex flex-wrap justify-end gap-3 mt-4">
                   {/* Action buttons based on current status - only shown to registrars */}
-                  {canManageRequests && selectedRequest.status === "Pending" && selectedRequest.hasPaid && (
+                  {canManageRequests && selectedRequest.status === "Pending" && (
                     <>
                       <Button 
                         variant="outline" 
                         className="border-amber-500 text-amber-600 hover:bg-amber-50"
                         onClick={() => handleActionClick("approve")}
+                        disabled={!selectedRequest.hasPaid}
                       >
                         <Clock className="mr-2 h-4 w-4" />
                         Process Request
                       </Button>
+                      {!selectedRequest.hasPaid && (
+                        <p className="text-xs text-amber-600 w-full mt-1 text-right">
+                          * Payment must be verified before processing
+                        </p>
+                      )}
                       <Button 
                         variant="outline"
                         className="border-red-500 text-red-600 hover:bg-red-50"
@@ -458,6 +466,18 @@ const ManageRequests = () => {
                     >
                       <Check className="mr-2 h-4 w-4" />
                       Mark as Completed
+                    </Button>
+                  )}
+                  
+                  {/* Button to verify payment - for unpaid requests */}
+                  {canManageRequests && selectedRequest.status === "Pending" && !selectedRequest.hasPaid && (
+                    <Button
+                      variant="outline"
+                      className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                      onClick={() => handleUploadReceipt(selectedRequest.id)}
+                    >
+                      <Check className="mr-2 h-4 w-4" />
+                      Verify Payment
                     </Button>
                   )}
                   
