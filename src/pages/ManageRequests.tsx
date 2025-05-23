@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotifications } from "../contexts/NotificationsContext";
@@ -29,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DocumentRequest, getAllRequests, getRequestById, updateRequestStatus } from "../services/requestService";
 import RequestTimeline from "../components/requests/RequestTimeline";
 import StatusBadge from "../components/shared/StatusBadge";
+import { useNavigate } from "react-router-dom";
 
 const ManageRequests = () => {
   const { user } = useAuth();
@@ -45,7 +45,8 @@ const ManageRequests = () => {
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<"approve" | "reject" | "complete" | null>(null);
   const [actionNote, setActionNote] = useState("");
-  
+  const navigate = useNavigate();
+
   // Check if user can approve/reject requests (only registrars)
   const canManageRequests = user?.role === 'registrar';
 
@@ -209,6 +210,10 @@ const ManageRequests = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleUploadReceipt = (requestId: string) => {
+    navigate(`/dashboard/upload-receipt?requestId=${requestId}`);
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
@@ -104,7 +103,7 @@ const MyRequests = () => {
       event.stopPropagation();
     }
     console.log("Navigating to receipt upload with requestId:", requestId);
-    navigate(`/dashboard/receipt-upload?requestId=${requestId}`);
+    navigate(`/dashboard/upload-receipt?requestId=${requestId}`);
   };
 
   return (
