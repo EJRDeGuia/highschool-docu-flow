@@ -1,514 +1,524 @@
-
-import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import DashboardLayout from "../components/layout/DashboardLayout";
-import ReceiptUpload from "../components/requests/ReceiptUpload";
-import { getRequestById, markRequestAsPaid, updateRequestStatus } from "../services/requestService";
-import { DocumentRequest } from "../services/requestService";
-import { AlertCircle, Loader, ReceiptText, Receipt, X, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import { createUserSpecificNotification, NotificationTemplates } from "@/services/notificationService";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, XCircle, Upload, CreditCard, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ReceiptUploadPage = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { user, hasPermission } = useAuth();
-  const [request, setRequest] = useState<DocumentRequest | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [receiptData, setReceiptData] = useState<string | null>(null);
-  const [isViewMode, setIsViewMode] = useState(false);
+  const { user } = useAuth();
+  const { addNotification } = useNotifications();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const requestId = searchParams.get("requestId");
-  const [confirmRejectOpen, setConfirmRejectOpen] = useState(false);
-  const [confirmVerifyOpen, setConfirmVerifyOpen] = useState(false);
-  const [rejectNote, setRejectNote] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
   
-  // Check if user is registrar or admin to determine view mode
-  const isRegistrar = hasPermission(['registrar', 'admin']);
+  const [request, setRequest] = useState<any>(null);
+  const [receipt, setReceipt] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [showRejectionForm, setShowRejectionForm] = useState(false);
 
-  useEffect(() => {
-    const fetchRequest = async () => {
-      if (!requestId) {
-        setIsLoading(false);
-        setError("No request ID provided");
-        toast({
-          title: "Error",
-          description: "No request ID provided. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+  const fetchRequestAndReceipt = async () => {
+    if (!requestId) return;
 
-      console.log("Fetching request with ID:", requestId);
-      
-      try {
-        const requestData = await getRequestById(requestId);
-        console.log("Request data returned:", requestData);
-        
-        if (requestData) {
-          setRequest(requestData);
-          
-          // If user is registrar/admin or if this is their request and it has receipt
-          if ((isRegistrar || requestData.userId === user?.id) && requestData.hasUploadedReceipt) {
-            setIsViewMode(true);
-            await fetchReceiptImage(requestId);
-          }
-        } else {
-          console.error("Request not found for ID:", requestId);
-          setError(`Request with ID ${requestId} not found. Please check the request ID and try again.`);
-          toast({
-            title: "Error",
-            description: "Request not found. Please check the request ID and try again.",
-            variant: "destructive",
-          });
-        }
-      } catch (error: any) {
-        console.error("Error fetching request:", error);
-        setError(`Error loading request: ${error.message || "Unknown error"}`);
-        toast({
-          title: "Error",
-          description: "Failed to load request information",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRequest();
-  }, [requestId, toast, user, isRegistrar]);
-
-  const fetchReceiptImage = async (reqId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('receipt_uploads')
-        .select('file_data')
-        .eq('request_id', reqId)
-        .order('uploaded_at', { ascending: false })
-        .limit(1)
+      // Fetch request details
+      const { data: requestData, error: requestError } = await supabase
+        .from('document_requests')
+        .select(`
+          *,
+          document_types (name, base_fee),
+          users (name, email, student_id)
+        `)
+        .eq('id', requestId)
         .single();
 
-      if (error) {
-        console.error("Error fetching receipt:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch receipt image",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (requestError) throw requestError;
+      setRequest(requestData);
 
-      if (data && data.file_data) {
-        setReceiptData(data.file_data);
+      // Fetch receipt if exists
+      const { data: receiptData, error: receiptError } = await supabase
+        .from('receipt_uploads')
+        .select('*')
+        .eq('request_id', requestId)
+        .maybeSingle();
+
+      if (receiptError && receiptError.code !== 'PGRST116') {
+        throw receiptError;
       }
-    } catch (error: any) {
-      console.error("Error in receipt fetch:", error);
+      
+      setReceipt(receiptData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load request details",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchRequestAndReceipt();
+  }, [requestId]);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user || !requestId) return;
+
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const fileData = e.target?.result as string;
+        
+        const { error } = await supabase
+          .from('receipt_uploads')
+          .insert({
+            request_id: requestId,
+            user_id: user.id,
+            filename: file.name,
+            file_data: fileData,
+          });
+
+        if (error) throw error;
+
+        // Update request status
+        await supabase
+          .from('document_requests')
+          .update({ has_uploaded_receipt: true })
+          .eq('id', requestId);
+
+        // Send notification to registrars
+        if (request) {
+          addNotification({
+            ...NotificationTemplates.receiptUploaded(user.name, request.document_types.name),
+          });
+        }
+
+        toast({
+          title: "Success",
+          description: "Receipt uploaded successfully",
+        });
+        
+        fetchRequestAndReceipt();
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload receipt",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleVerifyPayment = async () => {
-    if (!request || !requestId) return;
-    
-    setIsProcessing(true);
+    if (!requestId || !user) return;
+
+    setProcessing(true);
     try {
-      const updatedRequest = await markRequestAsPaid(requestId);
-      if (updatedRequest) {
-        toast({
-          title: "Success",
-          description: "Payment has been verified successfully.",
-        });
-        // Redirect to request management
-        setTimeout(() => {
-          navigate("/dashboard/manage-requests");
-        }, 1500);
-      } else {
-        throw new Error("Failed to verify payment");
+      await supabase
+        .from('document_requests')
+        .update({ 
+          has_paid: true,
+          status: 'Processing'
+        })
+        .eq('id', requestId);
+
+      // Send notification to student
+      if (request) {
+        createUserSpecificNotification(
+          addNotification,
+          'Payment Verified',
+          `Payment for ${request.document_types.name} has been verified. Your document is being processed.`,
+          request.user_id,
+          'success'
+        );
       }
-    } catch (error: any) {
-      console.error("Error verifying payment:", error);
+
+      toast({
+        title: "Success",
+        description: "Payment verified successfully",
+      });
+      
+      fetchRequestAndReceipt();
+    } catch (error) {
+      console.error('Verification error:', error);
       toast({
         title: "Error",
-        description: `Failed to verify payment: ${error.message || "Unknown error"}`,
+        description: "Failed to verify payment",
         variant: "destructive",
       });
     } finally {
-      setIsProcessing(false);
-      setConfirmVerifyOpen(false);
+      setProcessing(false);
     }
   };
 
   const handleRejectRequest = async () => {
-    if (!request || !requestId) return;
-    
-    setIsProcessing(true);
+    if (!requestId || !user || !rejectionReason.trim()) return;
+
+    setProcessing(true);
     try {
-      const updatedRequest = await updateRequestStatus(requestId, "Rejected", rejectNote || "Receipt not provided or insufficient");
-      if (updatedRequest) {
-        toast({
-          title: "Request Rejected",
-          description: "The request has been rejected successfully.",
-        });
-        // Redirect to request management
-        setTimeout(() => {
-          navigate("/dashboard/manage-requests");
-        }, 1500);
-      } else {
-        throw new Error("Failed to reject request");
+      await supabase
+        .from('document_requests')
+        .update({ 
+          status: 'Rejected'
+        })
+        .eq('id', requestId);
+
+      // Send notification to student
+      if (request) {
+        createUserSpecificNotification(
+          addNotification,
+          'Request Rejected',
+          `Your request for ${request.document_types.name} has been rejected: ${rejectionReason}`,
+          request.user_id,
+          'error'
+        );
       }
-    } catch (error: any) {
-      console.error("Error rejecting request:", error);
+
+      toast({
+        title: "Request Rejected",
+        description: "The request has been rejected and the student has been notified",
+      });
+      
+      navigate('/dashboard/manage-requests');
+    } catch (error) {
+      console.error('Rejection error:', error);
       toast({
         title: "Error",
-        description: `Failed to reject request: ${error.message || "Unknown error"}`,
+        description: "Failed to reject request",
         variant: "destructive",
       });
     } finally {
-      setIsProcessing(false);
-      setConfirmRejectOpen(false);
+      setProcessing(false);
+      setShowRejectionForm(false);
     }
   };
 
-  if (isLoading) {
+  if (!request) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading request details...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
   }
 
-  if (error) {
+  const isRegistrarOrAdmin = user?.role === 'registrar' || user?.role === 'admin';
+  const isRequestOwner = user?.id === request.user_id;
+  const canView = isRegistrarOrAdmin || isRequestOwner;
+
+  if (!canView) {
     return (
       <DashboardLayout>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Upload Payment Receipt</h1>
-          <p className="text-gray-600">
-            An error occurred while loading the request information
-          </p>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You don't have permission to view this request.
+            </AlertDescription>
+          </Alert>
         </div>
-
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-          <div className="flex items-start">
-            <AlertCircle className="h-6 w-6 text-red-500 mr-3 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-red-800">Request not found</h3>
-              <p className="text-red-700 mt-1">{error}</p>
-            </div>
-          </div>
-        </div>
-
-        <Button 
-          onClick={() => navigate("/dashboard/my-requests")} 
-          className="mt-4"
-        >
-          Return to My Requests
-        </Button>
-      </DashboardLayout>
-    );
-  }
-
-  // Display receipt view for registrars or users viewing their own uploaded receipt
-  if (isViewMode && receiptData) {
-    return (
-      <DashboardLayout>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Payment Receipt</h1>
-          <p className="text-gray-600">
-            {isRegistrar ? "Review the payment receipt uploaded by the student" : "Your uploaded receipt"}
-          </p>
-          {request && (
-            <div className="mt-2 text-sm text-gray-500">
-              Request: {request.documentTypeName} - ₱{request.fee.toFixed(2)}
-            </div>
-          )}
-        </div>
-        
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <ReceiptText className="h-5 w-5 text-blue-600" />
-              <h3 className="font-medium">Payment Receipt</h3>
-            </div>
-            
-            <div className="border border-gray-200 rounded-md overflow-hidden bg-gray-50">
-              <img 
-                src={receiptData} 
-                alt="Payment Receipt" 
-                className="w-full max-h-[600px] object-contain"
-              />
-            </div>
-          </CardContent>
-        </Card>
-        
-        {isRegistrar && !request?.hasPaid && (
-          <div className="flex flex-wrap gap-4 mt-6">
-            <Button 
-              onClick={() => setConfirmVerifyOpen(true)}
-              className="bg-green-600 hover:bg-green-700"
-              disabled={isProcessing}
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Verify Payment
-            </Button>
-            <Button 
-              onClick={() => setConfirmRejectOpen(true)}
-              variant="outline"
-              className="border-red-500 text-red-600 hover:bg-red-50"
-              disabled={isProcessing}
-            >
-              <X className="mr-2 h-4 w-4" />
-              Reject Request
-            </Button>
-            <Button 
-              onClick={() => navigate("/dashboard/manage-requests")} 
-              variant="outline"
-              disabled={isProcessing}
-            >
-              Back to Request Management
-            </Button>
-          </div>
-        )}
-        
-        {isRegistrar && request?.hasPaid && (
-          <div className="mt-6">
-            <div className="bg-green-50 border border-green-200 p-4 rounded-md flex items-center gap-2 mb-4">
-              <Check className="h-5 w-5 text-green-500" />
-              <p className="text-green-700">Payment has already been verified for this request</p>
-            </div>
-            <Button 
-              onClick={() => navigate("/dashboard/manage-requests")} 
-              variant="outline"
-            >
-              Back to Request Management
-            </Button>
-          </div>
-        )}
-        
-        {!isRegistrar && (
-          <Button 
-            onClick={() => navigate("/dashboard/my-requests")} 
-            variant="outline"
-          >
-            Return to My Requests
-          </Button>
-        )}
-
-        {/* Verify Payment Dialog */}
-        <Dialog open={confirmVerifyOpen} onOpenChange={setConfirmVerifyOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Verify Payment</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to verify this payment? This will mark the request as paid.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setConfirmVerifyOpen(false)}
-                disabled={isProcessing}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleVerifyPayment}
-                className="bg-green-600 hover:bg-green-700"
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Verify Payment
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Reject Request Dialog */}
-        <Dialog open={confirmRejectOpen} onOpenChange={setConfirmRejectOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reject Request</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to reject this request? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <Textarea
-                placeholder="Reason for rejection (optional)"
-                value={rejectNote}
-                onChange={(e) => setRejectNote(e.target.value)}
-                className="min-h-[100px]"
-              />
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setConfirmRejectOpen(false)}
-                disabled={isProcessing}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleRejectRequest}
-                variant="destructive"
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <X className="mr-2 h-4 w-4" />
-                    Reject Request
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </DashboardLayout>
-    );
-  }
-
-  // For registrars when there's no receipt uploaded yet
-  if (isRegistrar && request && !request.hasUploadedReceipt) {
-    return (
-      <DashboardLayout>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Payment Receipt</h1>
-          <p className="text-gray-600">
-            This request does not have an uploaded receipt yet
-          </p>
-          {request && (
-            <div className="mt-2 text-sm text-gray-500">
-              Request: {request.documentTypeName} - ₱{request.fee.toFixed(2)}
-            </div>
-          )}
-        </div>
-        
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Receipt className="h-5 w-5 text-amber-600" />
-              <h3 className="font-medium">No Receipt Uploaded</h3>
-            </div>
-            
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
-              <p className="text-amber-800">
-                The student has not uploaded a payment receipt for this request yet. 
-                You can either wait for the receipt to be uploaded or reject the request.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <div className="flex flex-wrap gap-4 mt-6">
-          <Button 
-            onClick={() => setConfirmRejectOpen(true)}
-            variant="outline"
-            className="border-red-500 text-red-600 hover:bg-red-50"
-            disabled={isProcessing}
-          >
-            <X className="mr-2 h-4 w-4" />
-            Reject Request
-          </Button>
-          <Button 
-            onClick={() => navigate("/dashboard/manage-requests")} 
-            variant="outline"
-          >
-            Back to Request Management
-          </Button>
-        </div>
-
-        {/* Reject Request Dialog */}
-        <Dialog open={confirmRejectOpen} onOpenChange={setConfirmRejectOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Reject Request</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to reject this request? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <Textarea
-                placeholder="Reason for rejection (optional)"
-                value={rejectNote}
-                onChange={(e) => setRejectNote(e.target.value)}
-                className="min-h-[100px]"
-              />
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setConfirmRejectOpen(false)}
-                disabled={isProcessing}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleRejectRequest}
-                variant="destructive"
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <X className="mr-2 h-4 w-4" />
-                    Reject Request
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Upload Payment Receipt</h1>
-        <p className="text-gray-600">
-          Upload a screenshot of your payment receipt to verify your payment
-        </p>
-        {request && (
-          <div className="mt-2 text-sm text-gray-500">
-            Request: {request.documentTypeName} - ₱{request.fee.toFixed(2)}
-          </div>
+      <div className="space-y-6">
+        <PageHeader
+          title={isRegistrarOrAdmin ? "Payment Verification" : "Receipt Upload"}
+          description={isRegistrarOrAdmin ? "Review and verify student payment" : "Upload your payment receipt"}
+        />
+
+        {/* Request Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Request Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Document Type</Label>
+                <p className="text-base">{request.document_types?.name}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Fee</Label>
+                <p className="text-base">₱{request.fee}</p>
+              </div>
+              {isRegistrarOrAdmin && (
+                <>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Student</Label>
+                    <p className="text-base">{request.users?.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500">Student ID</Label>
+                    <p className="text-base">{request.users?.student_id}</p>
+                  </div>
+                </>
+              )}
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Status</Label>
+                <Badge variant={request.status === 'Approved' ? 'default' : 'secondary'}>
+                  {request.status}
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-500">Payment Status</Label>
+                <Badge variant={request.has_paid ? 'default' : 'secondary'}>
+                  {request.has_paid ? 'Verified' : 'Pending'}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment QR Code - Show for students */}
+        {!isRegistrarOrAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Payment Information
+              </CardTitle>
+              <CardDescription>
+                Scan the QR code below to make your payment via InstaPay
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="inline-block p-4 bg-white rounded-lg shadow-sm border">
+                <img 
+                  src="/lovable-uploads/022b0cff-37f6-4f3f-811e-bb565c45c0b1.png" 
+                  alt="InstaPay QR Code" 
+                  className="w-64 h-64 mx-auto"
+                />
+                <p className="mt-2 text-sm text-gray-600">InstaPay QR Code</p>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                After making the payment, please upload your receipt below
+              </p>
+            </CardContent>
+          </Card>
         )}
+
+        {/* Receipt Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {receipt ? 'Uploaded Receipt' : 'Payment Receipt'}
+            </CardTitle>
+            <CardDescription>
+              {receipt 
+                ? (isRegistrarOrAdmin ? 'Review the uploaded receipt' : 'Your uploaded receipt')
+                : 'Upload your payment receipt for verification'
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {receipt ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="text-sm font-medium">Receipt uploaded</span>
+                </div>
+                
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <p className="text-sm text-gray-600 mb-2">File: {receipt.filename}</p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Uploaded: {new Date(receipt.uploaded_at).toLocaleString()}
+                  </p>
+                  
+                  {receipt.file_data && (
+                    <div className="max-w-md mx-auto">
+                      <img 
+                        src={receipt.file_data} 
+                        alt="Payment Receipt" 
+                        className="w-full h-auto border rounded-lg shadow-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Action buttons for registrars */}
+                {isRegistrarOrAdmin && !request.has_paid && (
+                  <div className="flex gap-4 pt-4">
+                    <Button
+                      onClick={handleVerifyPayment}
+                      disabled={processing}
+                      className="flex items-center gap-2"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {processing ? "Verifying..." : "Verify Payment"}
+                    </Button>
+                    
+                    {!showRejectionForm ? (
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowRejectionForm(true)}
+                        className="flex items-center gap-2"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Reject Request
+                      </Button>
+                    ) : (
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                          <Textarea
+                            id="rejection-reason"
+                            placeholder="Please provide a reason for rejection..."
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleRejectRequest}
+                            disabled={!rejectionReason.trim() || processing}
+                          >
+                            Confirm Rejection
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setShowRejectionForm(false);
+                              setRejectionReason("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {request.has_paid && (
+                  <Alert>
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Payment has been verified. Your document is being processed.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {!isRegistrarOrAdmin ? (
+                  // Upload form for students
+                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-4" />
+                    <div className="space-y-2">
+                      <Label htmlFor="receipt-upload" className="cursor-pointer">
+                        <span className="text-sm font-medium text-violet-600 hover:text-violet-500">
+                          Click to upload your receipt
+                        </span>
+                        <Input
+                          id="receipt-upload"
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={handleFileUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </Label>
+                      <p className="text-xs text-gray-500">
+                        Support: JPG, PNG, PDF (max 10MB)
+                      </p>
+                    </div>
+                    {uploading && (
+                      <div className="mt-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-600 mx-auto"></div>
+                        <p className="text-sm text-gray-500 mt-2">Uploading...</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // No receipt message for registrars
+                  <div className="text-center py-8">
+                    <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Receipt Uploaded</h3>
+                    <p className="text-gray-500 mb-6">
+                      The student has not uploaded a payment receipt yet.
+                    </p>
+                    
+                    {!showRejectionForm ? (
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowRejectionForm(true)}
+                        className="flex items-center gap-2 mx-auto"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Reject Request
+                      </Button>
+                    ) : (
+                      <div className="max-w-md mx-auto space-y-3">
+                        <div>
+                          <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                          <Textarea
+                            id="rejection-reason"
+                            placeholder="Please provide a reason for rejection..."
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleRejectRequest}
+                            disabled={!rejectionReason.trim() || processing}
+                          >
+                            Confirm Rejection
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setShowRejectionForm(false);
+                              setRejectionReason("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
-      
-      <ReceiptUpload requestId={requestId} />
     </DashboardLayout>
   );
 };

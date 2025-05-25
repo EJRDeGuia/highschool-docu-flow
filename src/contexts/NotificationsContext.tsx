@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth, UserRole } from './AuthContext';
 
 export interface Notification {
   id: string;
@@ -10,6 +11,8 @@ export interface Notification {
   read: boolean;
   action?: string;
   type?: 'success' | 'info' | 'warning' | 'error';
+  targetRoles?: UserRole[]; // New field to specify which roles can see this notification
+  userId?: string; // For user-specific notifications
 }
 
 interface NotificationsContextType {
@@ -24,14 +27,33 @@ interface NotificationsContextType {
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
 export const NotificationsProvider = ({ children }: { children: ReactNode }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [allNotifications, setAllNotifications] = useState<Notification[]>([]);
+  const { user } = useAuth();
+
+  // Filter notifications based on user role and user ID
+  const notifications = allNotifications.filter(notification => {
+    // If notification has targetRoles, check if user's role is included
+    if (notification.targetRoles && notification.targetRoles.length > 0) {
+      if (!user || !notification.targetRoles.includes(user.role)) {
+        return false;
+      }
+    }
+    
+    // If notification has userId, check if it matches current user
+    if (notification.userId && user && notification.userId !== user.id) {
+      return false;
+    }
+    
+    // If no specific targeting, show to all users
+    return true;
+  });
 
   // Load notifications from localStorage on mount
   useEffect(() => {
     const storedNotifications = localStorage.getItem('notifications');
     if (storedNotifications) {
       try {
-        setNotifications(JSON.parse(storedNotifications));
+        setAllNotifications(JSON.parse(storedNotifications));
       } catch (error) {
         console.error('Error parsing notifications from localStorage', error);
       }
@@ -40,8 +62,8 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-  }, [notifications]);
+    localStorage.setItem('notifications', JSON.stringify(allNotifications));
+  }, [allNotifications]);
 
   const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
     const newNotification: Notification = {
@@ -52,11 +74,11 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
       type: notification.type || 'info',
     };
 
-    setNotifications((prev) => [newNotification, ...prev].slice(0, 50)); // Limit to 50 notifications
+    setAllNotifications((prev) => [newNotification, ...prev].slice(0, 50)); // Limit to 50 notifications
   };
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) =>
+    setAllNotifications((prev) =>
       prev.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification
       )
@@ -64,17 +86,17 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
   };
 
   const markAllAsRead = () => {
-    setNotifications((prev) =>
+    setAllNotifications((prev) =>
       prev.map((notification) => ({ ...notification, read: true }))
     );
   };
 
   const removeNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    setAllNotifications((prev) => prev.filter((notification) => notification.id !== id));
   };
 
   const clearAll = () => {
-    setNotifications([]);
+    setAllNotifications([]);
   };
 
   return (
