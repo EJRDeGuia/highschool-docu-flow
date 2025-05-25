@@ -48,7 +48,7 @@ export const NotificationPopover = () => {
             </Button>
           )}
         </div>
-        <ScrollArea className="max-h-[300px]">
+        <ScrollArea className="h-[400px]">
           {notifications.length > 0 ? (
             <div className="divide-y divide-gray-100">
               {notifications.map((notification) => (
@@ -71,9 +71,9 @@ export const NotificationPopover = () => {
                         notification.read ? 'bg-transparent' : 'bg-school-primary'
                       }`} 
                     />
-                    <div>
-                      <p className="text-sm font-medium">{notification.title}</p>
-                      <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium break-words">{notification.title}</p>
+                      <p className="text-sm text-gray-500 mt-1 break-words">{notification.message}</p>
                       <p className="text-xs text-gray-400 mt-1">
                         {new Date(notification.timestamp).toLocaleString()}
                       </p>
@@ -83,8 +83,9 @@ export const NotificationPopover = () => {
               ))}
             </div>
           ) : (
-            <div className="p-4 text-center text-gray-500">
-              No notifications
+            <div className="p-8 text-center text-gray-500">
+              <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-sm">No notifications yet</p>
             </div>
           )}
         </ScrollArea>
