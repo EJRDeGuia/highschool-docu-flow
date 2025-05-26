@@ -11,11 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader, Upload, FileCheck, AlertCircle, QrCode, X, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { markReceiptUploaded } from "../../services/requestService";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../ui/popover";
 
 interface ReceiptUploadProps {
   requestId: string | null;
@@ -32,11 +27,12 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showQrCode, setShowQrCode] = useState(true);
-  const [showConfirmationPopover, setShowConfirmationPopover] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("File selected, preparing confirmation dialog");
     setError(null);
+    
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
@@ -45,9 +41,9 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
-        // Show confirmation popover after preview is ready
-        setShowConfirmationPopover(true);
-        console.log("Preview ready, showing confirmation popover");
+        // Show confirmation dialog after preview is ready
+        setShowConfirmationDialog(true);
+        console.log("Preview ready, showing confirmation dialog");
       };
       reader.readAsDataURL(selectedFile);
     }
@@ -58,7 +54,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
 
     console.log("User confirmed upload, starting upload process");
     setIsUploading(true);
-    setShowConfirmationPopover(false);
+    setShowConfirmationDialog(false);
 
     try {
       console.log("Starting upload for requestId:", requestId, "userId:", user.id);
@@ -128,7 +124,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
 
   const handleCancelConfirmation = () => {
     console.log("User cancelled confirmation");
-    setShowConfirmationPopover(false);
+    setShowConfirmationDialog(false);
     setFile(null);
     setPreview(null);
     // Reset the file input
@@ -214,12 +210,23 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
           />
         </div>
 
-        {/* Confirmation Popover */}
-        {showConfirmationPopover && file && preview && (
+        {/* Confirmation Dialog Modal */}
+        {showConfirmationDialog && file && preview && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg max-h-[90vh] overflow-y-auto">
               <div className="space-y-4">
-                <h4 className="font-medium text-lg">Confirm Receipt Upload</h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-lg">Confirm Receipt Upload</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelConfirmation}
+                    disabled={isUploading}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                
                 <p className="text-sm text-gray-600">
                   Is this the correct receipt for your payment?
                 </p>
@@ -251,7 +258,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
                     ) : (
                       <>
                         <Check className="mr-2 h-4 w-4" />
-                        Yes, Upload
+                        Yes, Upload This Receipt
                       </>
                     )}
                   </Button>
@@ -270,9 +277,9 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
           </div>
         )}
         
-        {preview && !showConfirmationPopover && (
+        {preview && !showConfirmationDialog && !uploadComplete && (
           <div className="mt-4">
-            <Label>Preview</Label>
+            <Label>Uploaded Receipt Preview</Label>
             <div className="mt-2 border border-gray-200 rounded-md overflow-hidden">
               <img 
                 src={preview} 
