@@ -145,9 +145,9 @@ const MyRequests = () => {
     }
   };
 
-  // Updated cancellation logic - only allow cancellation if not verified by registrar
+  // Updated cancellation logic - only allow cancellation if not verified by registrar AND no receipt uploaded
   const canCancelRequest = (request: DocumentRequest) => {
-    return request.status === 'Pending' && !request.hasPaid;
+    return request.status === 'Pending' && !request.hasPaid && !request.hasUploadedReceipt;
   };
 
   return (
