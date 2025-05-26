@@ -56,6 +56,13 @@ export const NotificationTemplates = {
     targetRoles: ['student'] as UserRole[],
     type: 'error' as const,
   }),
+
+  requestCancelled: (studentName: string, documentType: string) => ({
+    title: 'Request Cancelled',
+    message: `${studentName} has cancelled their request for ${documentType}`,
+    targetRoles: ['student', 'registrar', 'admin'] as UserRole[],
+    type: 'warning' as const,
+  }),
   
   paymentVerified: (documentType: string) => ({
     title: 'Payment Verified',
