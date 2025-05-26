@@ -35,6 +35,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   const [showConfirmationPopover, setShowConfirmationPopover] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File selected, preparing confirmation dialog");
     setError(null);
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -44,11 +45,11 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
+        // Show confirmation popover after preview is ready
+        setShowConfirmationPopover(true);
+        console.log("Preview ready, showing confirmation popover");
       };
       reader.readAsDataURL(selectedFile);
-
-      // Show confirmation popover
-      setShowConfirmationPopover(true);
     }
   };
 
@@ -203,75 +204,71 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
         
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label htmlFor="receipt">Receipt Image</Label>
-          <div className="flex items-center gap-3">
-            <Popover open={showConfirmationPopover} onOpenChange={setShowConfirmationPopover}>
-              <PopoverTrigger asChild>
-                <Input 
-                  id="receipt" 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleFileChange} 
-                  disabled={isUploading || uploadComplete} 
-                  className="cursor-pointer" 
-                />
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4" align="start">
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm">Confirm Receipt Upload</h4>
-                  <p className="text-sm text-gray-600">
-                    Is this the correct receipt for your payment?
-                  </p>
-                  
-                  {preview && (
-                    <div className="border rounded-md overflow-hidden">
-                      <img 
-                        src={preview} 
-                        alt="Receipt preview" 
-                        className="w-full h-32 object-cover bg-gray-50" 
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="text-xs text-gray-500">
-                    <p><strong>File:</strong> {file?.name}</p>
-                    <p><strong>Request ID:</strong> {requestId}</p>
-                  </div>
-                  
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      size="sm" 
-                      onClick={handleConfirmUpload}
-                      disabled={isUploading}
-                      className="flex-1"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader className="mr-1 h-3 w-3 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Check className="mr-1 h-3 w-3" />
-                          Yes, Upload
-                        </>
-                      )}
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={handleCancelConfirmation}
-                      disabled={isUploading}
-                      className="flex-1"
-                    >
-                      <X className="mr-1 h-3 w-3" />
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <Input 
+            id="receipt" 
+            type="file" 
+            accept="image/*" 
+            onChange={handleFileChange} 
+            disabled={isUploading || uploadComplete} 
+            className="cursor-pointer" 
+          />
         </div>
+
+        {/* Confirmation Popover */}
+        {showConfirmationPopover && file && preview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg">
+              <div className="space-y-4">
+                <h4 className="font-medium text-lg">Confirm Receipt Upload</h4>
+                <p className="text-sm text-gray-600">
+                  Is this the correct receipt for your payment?
+                </p>
+                
+                <div className="border rounded-md overflow-hidden">
+                  <img 
+                    src={preview} 
+                    alt="Receipt preview" 
+                    className="w-full h-48 object-cover bg-gray-50" 
+                  />
+                </div>
+                
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p><strong>File:</strong> {file.name}</p>
+                  <p><strong>Request ID:</strong> {requestId}</p>
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <Button 
+                    onClick={handleConfirmUpload}
+                    disabled={isUploading}
+                    className="flex-1"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Yes, Upload
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancelConfirmation}
+                    disabled={isUploading}
+                    className="flex-1"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         {preview && !showConfirmationPopover && (
           <div className="mt-4">
