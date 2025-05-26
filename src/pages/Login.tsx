@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -34,14 +33,7 @@ const Login = () => {
     setIsSubmitting(true);
     
     try {
-      await login(email, password);
-      
-      // If remember me is checked, we could store additional session info
-      if (rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('rememberMe');
-      }
+      await login(email, password, rememberMe);
       
       toast({
         title: "Success",

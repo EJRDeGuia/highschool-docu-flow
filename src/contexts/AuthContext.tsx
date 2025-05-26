@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,7 +18,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
 }
@@ -36,7 +35,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkUserSession = async () => {
       try {
-        const storedUser = localStorage.getItem('user');
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        const sessionKey = rememberMe ? 'user' : 'sessionUser';
+        
+        // Check for remembered session first, then session-only
+        let storedUser = localStorage.getItem(sessionKey);
+        if (!storedUser && rememberMe) {
+          // If remember me is true but no stored user, clear the flag
+          localStorage.removeItem('rememberMe');
+        }
+        
+        // For session-only users, also check sessionStorage
+        if (!storedUser && !rememberMe) {
+          storedUser = sessionStorage.getItem('sessionUser');
+        }
+        
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
@@ -44,6 +57,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error("Error checking user session:", error);
         localStorage.removeItem('user');
+        localStorage.removeItem('rememberMe');
+        sessionStorage.removeItem('sessionUser');
       } finally {
         setIsLoading(false);
       }
@@ -52,8 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkUserSession();
   }, []);
 
-  // Login function
-  const login = async (email: string, password: string): Promise<void> => {
+  // Login function with remember me support
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
     setIsLoading(true);
     
     try {
@@ -84,7 +99,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
       
       setUser(loggedInUser);
-      localStorage.setItem('user', JSON.stringify(loggedInUser));
+      
+      // Handle session persistence based on remember me preference
+      if (rememberMe) {
+        localStorage.setItem('user', JSON.stringify(loggedInUser));
+        localStorage.setItem('rememberMe', 'true');
+        // Clear any session-only data
+        sessionStorage.removeItem('sessionUser');
+      } else {
+        sessionStorage.setItem('sessionUser', JSON.stringify(loggedInUser));
+        // Clear any persistent data
+        localStorage.removeItem('user');
+        localStorage.removeItem('rememberMe');
+      }
     } catch (error) {
       console.error("Login error:", error);
       throw new Error('Invalid email or password');
@@ -97,6 +124,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('rememberMe');
+    sessionStorage.removeItem('sessionUser');
   };
 
   // Helper function to check if user has required role
