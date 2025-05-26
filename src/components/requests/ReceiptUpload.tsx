@@ -54,6 +54,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submit clicked, showing verification dialog");
     setError(null);
 
     // Validate all required data is present
@@ -91,13 +92,15 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
       return;
     }
 
-    // Show verification dialog instead of uploading immediately
+    // Show verification dialog
+    console.log("Opening verification dialog");
     setShowVerificationDialog(true);
   };
 
   const handleConfirmUpload = async () => {
     if (!file || !user || !requestId) return;
 
+    console.log("User confirmed upload, starting upload process");
     setIsUploading(true);
     setShowVerificationDialog(false);
 
@@ -168,6 +171,7 @@ const ReceiptUpload = ({ requestId }: ReceiptUploadProps) => {
   };
 
   const handleCancelVerification = () => {
+    console.log("User cancelled verification");
     setShowVerificationDialog(false);
   };
 
