@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, XCircle, Upload, CreditCard, AlertCircle } from "lucide-react";
+import { CheckCircle, XCircle, Upload, CreditCard, AlertCircle, X, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,6 +30,11 @@ const ReceiptUploadPage = () => {
   const [processing, setProcessing] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectionForm, setShowRejectionForm] = useState(false);
+  
+  // New state for confirmation dialog
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   const fetchRequestAndReceipt = async () => {
     if (!requestId) return;
@@ -74,6 +79,89 @@ const ReceiptUploadPage = () => {
   useEffect(() => {
     fetchRequestAndReceipt();
   }, [requestId]);
+
+  const handleFileSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user || !requestId) return;
+
+    setSelectedFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setFilePreview(e.target?.result as string);
+      setShowConfirmationDialog(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!selectedFile || !user || !requestId) return;
+
+    setUploading(true);
+    setShowConfirmationDialog(false);
+    
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const fileData = e.target?.result as string;
+        
+        const { error } = await supabase
+          .from('receipt_uploads')
+          .insert({
+            request_id: requestId,
+            user_id: user.id,
+            filename: selectedFile.name,
+            file_data: fileData,
+          });
+
+        if (error) throw error;
+
+        // Update request status
+        await supabase
+          .from('document_requests')
+          .update({ has_uploaded_receipt: true })
+          .eq('id', requestId);
+
+        // Send notification to registrars
+        if (request) {
+          addNotification({
+            ...NotificationTemplates.receiptUploaded(user.name, request.document_types.name),
+          });
+        }
+
+        toast({
+          title: "Success",
+          description: "Receipt uploaded successfully",
+        });
+        
+        fetchRequestAndReceipt();
+      };
+      reader.readAsDataURL(selectedFile);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload receipt",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      setSelectedFile(null);
+      setFilePreview(null);
+    }
+  };
+
+  const handleCancelConfirmation = () => {
+    setShowConfirmationDialog(false);
+    setSelectedFile(null);
+    setFilePreview(null);
+    // Reset the file input
+    const fileInput = document.getElementById('receipt-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -252,6 +340,73 @@ const ReceiptUploadPage = () => {
           title={isRegistrarOrAdmin ? "Payment Verification" : "Receipt Upload"}
           description={isRegistrarOrAdmin ? "Review and verify student payment" : "Upload your payment receipt"}
         />
+
+        {/* Confirmation Dialog Modal */}
+        {showConfirmationDialog && selectedFile && filePreview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg max-h-[90vh] overflow-y-auto">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-lg">Confirm Receipt Upload</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelConfirmation}
+                    disabled={uploading}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <p className="text-sm text-gray-600">
+                  Is this the correct receipt for your payment?
+                </p>
+                
+                <div className="border rounded-md overflow-hidden">
+                  <img 
+                    src={filePreview} 
+                    alt="Receipt preview" 
+                    className="w-full h-48 object-cover bg-gray-50" 
+                  />
+                </div>
+                
+                <div className="text-xs text-gray-500 space-y-1">
+                  <p><strong>File:</strong> {selectedFile.name}</p>
+                  <p><strong>Request ID:</strong> {requestId}</p>
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <Button 
+                    onClick={handleConfirmUpload}
+                    disabled={uploading}
+                    className="flex-1"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Yes, Upload This Receipt
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancelConfirmation}
+                    disabled={uploading}
+                    className="flex-1"
+                  >
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Request Details */}
         <Card>
@@ -444,7 +599,7 @@ const ReceiptUploadPage = () => {
                           id="receipt-upload"
                           type="file"
                           accept="image/*,.pdf"
-                          onChange={handleFileUpload}
+                          onChange={handleFileSelection}
                           disabled={uploading}
                           className="hidden"
                         />
@@ -453,12 +608,6 @@ const ReceiptUploadPage = () => {
                         Support: JPG, PNG, PDF (max 10MB)
                       </p>
                     </div>
-                    {uploading && (
-                      <div className="mt-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-600 mx-auto"></div>
-                        <p className="text-sm text-gray-500 mt-2">Uploading...</p>
-                      </div>
-                    )}
                   </div>
                 ) : (
                   // No receipt message for registrars
