@@ -229,7 +229,7 @@ const MyRequests = () => {
                     <StatusBadge status={request.status} />
                     
                     <div className="flex gap-2">
-                      {!request.hasUploadedReceipt && !request.hasPaid && (
+                      {!request.hasUploadedReceipt && !request.hasPaid && request.status !== 'Cancelled' && (
                         <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => handlePayNow(request.id, e)}>
                           <Upload className="mr-1 h-3 w-3" />
                           Pay Now
@@ -355,7 +355,7 @@ const MyRequests = () => {
                 </div>
                 
                 <div className="flex justify-end gap-3 mt-4">
-                  {!selectedRequest.hasUploadedReceipt && !selectedRequest.hasPaid && (
+                  {!selectedRequest.hasUploadedReceipt && !selectedRequest.hasPaid && selectedRequest.status !== 'Cancelled' && (
                     <Button 
                       onClick={() => handlePayNow(selectedRequest.id)}
                     >
