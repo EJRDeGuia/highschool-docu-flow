@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { FilePlus, Loader, Search, SlidersHorizontal, Upload, X } from "lucide-react";
+import { FilePlus, Loader, Search, SlidersHorizontal, Upload, X, Check } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { 
   Select,
@@ -145,8 +145,9 @@ const MyRequests = () => {
     }
   };
 
+  // Updated cancellation logic - only allow cancellation if not verified by registrar
   const canCancelRequest = (request: DocumentRequest) => {
-    return request.status === 'Pending' && !request.hasUploadedReceipt && !request.hasPaid;
+    return request.status === 'Pending' && !request.hasPaid;
   };
 
   return (

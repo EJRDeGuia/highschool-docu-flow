@@ -318,6 +318,11 @@ const ReceiptUploadPage = () => {
   const isRequestOwner = user?.id === request.user_id;
   const canView = isRegistrarOrAdmin || isRequestOwner;
 
+  // Check if request can be cancelled - only if not verified by registrar (has_paid is false)
+  const canCancelRequest = (request: any) => {
+    return request.status === 'Pending' && !request.has_paid;
+  };
+
   if (!canView) {
     return (
       <DashboardLayout>
@@ -341,10 +346,10 @@ const ReceiptUploadPage = () => {
           description={isRegistrarOrAdmin ? "Review and verify student payment" : "Upload your payment receipt"}
         />
 
-        {/* Confirmation Dialog Modal */}
+        {/* Confirmation Dialog Modal with bigger preview */}
         {showConfirmationDialog && selectedFile && filePreview && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full shadow-lg max-h-[90vh] overflow-y-auto">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-lg">Confirm Receipt Upload</h4>
@@ -366,7 +371,7 @@ const ReceiptUploadPage = () => {
                   <img 
                     src={filePreview} 
                     alt="Receipt preview" 
-                    className="w-full h-48 object-cover bg-gray-50" 
+                    className="w-full h-96 object-contain bg-gray-50" 
                   />
                 </div>
                 
@@ -618,48 +623,53 @@ const ReceiptUploadPage = () => {
                       The student has not uploaded a payment receipt yet.
                     </p>
                     
-                    {!showRejectionForm ? (
-                      <Button
-                        variant="destructive"
-                        onClick={() => setShowRejectionForm(true)}
-                        className="flex items-center gap-2 mx-auto"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Reject Request
-                      </Button>
-                    ) : (
-                      <div className="max-w-md mx-auto space-y-3">
-                        <div>
-                          <Label htmlFor="rejection-reason">Rejection Reason</Label>
-                          <Textarea
-                            id="rejection-reason"
-                            placeholder="Please provide a reason for rejection..."
-                            value={rejectionReason}
-                            onChange={(e) => setRejectionReason(e.target.value)}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div className="flex gap-2 justify-center">
+                    {/* Show rejection form only if request can be cancelled */}
+                    {canCancelRequest(request) && (
+                      <>
+                        {!showRejectionForm ? (
                           <Button
                             variant="destructive"
-                            size="sm"
-                            onClick={handleRejectRequest}
-                            disabled={!rejectionReason.trim() || processing}
+                            onClick={() => setShowRejectionForm(true)}
+                            className="flex items-center gap-2 mx-auto"
                           >
-                            Confirm Rejection
+                            <XCircle className="h-4 w-4" />
+                            Reject Request
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setShowRejectionForm(false);
-                              setRejectionReason("");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
+                        ) : (
+                          <div className="max-w-md mx-auto space-y-3">
+                            <div>
+                              <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                              <Textarea
+                                id="rejection-reason"
+                                placeholder="Please provide a reason for rejection..."
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div className="flex gap-2 justify-center">
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleRejectRequest}
+                                disabled={!rejectionReason.trim() || processing}
+                              >
+                                Confirm Rejection
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setShowRejectionForm(false);
+                                  setRejectionReason("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
