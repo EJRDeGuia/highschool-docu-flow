@@ -580,3 +580,50 @@ export const getRequestStatistics = async (): Promise<{
 
   return stats;
 };
+
+// Cancel request (only allowed before receipt upload)
+export const cancelRequest = async (requestId: string): Promise<DocumentRequest | undefined> => {
+  // First check if the request exists and is cancellable
+  const request = await getRequestById(requestId);
+  if (!request) {
+    throw new Error("Request not found");
+  }
+  
+  if (request.hasUploadedReceipt || request.hasPaid) {
+    throw new Error("Cannot cancel request after receipt has been uploaded or payment has been made");
+  }
+  
+  if (request.status !== 'Pending') {
+    throw new Error("Can only cancel requests that are pending");
+  }
+
+  // Update request status to cancelled
+  const { data: updatedRequest, error: updateError } = await supabase
+    .from('document_requests')
+    .update({ status: 'Cancelled' })
+    .eq('id', requestId)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error('Error cancelling request:', updateError);
+    throw new Error('Failed to cancel request');
+  }
+
+  // Add timeline item
+  const { error: timelineError } = await supabase
+    .from('request_timeline')
+    .insert({
+      request_id: requestId,
+      step: 'Request Cancelled',
+      status: 'completed' as 'completed',
+      note: 'Request cancelled by student'
+    });
+
+  if (timelineError) {
+    console.error('Error adding timeline item:', timelineError);
+  }
+
+  // Fetch the updated request with timeline
+  return await getRequestById(requestId);
+};

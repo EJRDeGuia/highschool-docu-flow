@@ -144,6 +144,7 @@ const MyRequests = () => {
                 <SelectItem value="Approved">Approved</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
                 <SelectItem value="Rejected">Rejected</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>

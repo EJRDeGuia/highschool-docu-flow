@@ -1,49 +1,37 @@
 
-import React from 'react';
 import { Badge } from "../ui/badge";
-import { Clock, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-type StatusType = "Pending" | "Processing" | "Approved" | "Rejected" | "Completed" | "Cancelled";
 
 interface StatusBadgeProps {
-  status: StatusType;
+  status: string;
   className?: string;
 }
 
 const StatusBadge = ({ status, className }: StatusBadgeProps) => {
-  const getStatusIcon = () => {
-    switch (status) {
-      case "Pending":
-        return <Clock className="h-3.5 w-3.5" />;
-      case "Processing":
-        return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
-      case "Approved":
-      case "Completed":
-        return <CheckCircle2 className="h-3.5 w-3.5" />;
-      case "Rejected":
-      case "Cancelled":
-        return <X className="h-3.5 w-3.5" />;
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'processing':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'approved':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'completed':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
-        return <AlertCircle className="h-3.5 w-3.5" />;
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "flex items-center gap-1.5 py-1.5 px-2.5 font-medium text-xs rounded-full",
-        status === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200" : "",
-        status === "Processing" ? "bg-blue-50 text-blue-700 border-blue-200" : "",
-        status === "Approved" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "",
-        status === "Completed" ? "bg-green-50 text-green-700 border-green-200" : "",
-        status === "Rejected" ? "bg-red-50 text-red-700 border-red-200" : "",
-        status === "Cancelled" ? "bg-gray-50 text-gray-700 border-gray-200" : "",
-        className
-      )}
+    <Badge 
+      variant="outline" 
+      className={`${getStatusColor(status)} ${className || ''}`}
     >
-      {getStatusIcon()} {status}
+      {status}
     </Badge>
   );
 };
