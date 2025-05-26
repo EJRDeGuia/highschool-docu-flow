@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { FilePlus, Loader, Search, SlidersHorizontal, Upload } from "lucide-react";
+import { FilePlus, Loader, Search, SlidersHorizontal, Upload, X } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { 
   Select,
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { DocumentRequest, getUserRequests } from "../services/requestService";
+import { DocumentRequest, getUserRequests, cancelRequest } from "../services/requestService";
 import { useNavigate } from "react-router-dom";
 import RequestTimeline from "../components/requests/RequestTimeline";
 import StatusBadge from "../components/shared/StatusBadge";
@@ -31,6 +31,7 @@ const MyRequests = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null);
+  const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -104,6 +105,48 @@ const MyRequests = () => {
     }
     console.log("Navigating to receipt upload with requestId:", requestId);
     navigate(`/dashboard/upload-receipt?requestId=${requestId}`);
+  };
+
+  const handleCancelRequest = async (requestId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    setCancellingRequestId(requestId);
+    
+    try {
+      await cancelRequest(requestId);
+      
+      // Refresh the requests list
+      if (user?.id) {
+        const userRequests = await getUserRequests(user.id);
+        setRequests(userRequests);
+        setFilteredRequests(userRequests);
+      }
+      
+      toast({
+        title: "Success",
+        description: "Request cancelled successfully.",
+      });
+      
+      // Close modal if the cancelled request was selected
+      if (selectedRequest?.id === requestId) {
+        setSelectedRequest(null);
+      }
+    } catch (error) {
+      console.error("Error cancelling request:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to cancel request.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingRequestId(null);
+    }
+  };
+
+  const canCancelRequest = (request: DocumentRequest) => {
+    return request.status === 'Pending' && !request.hasUploadedReceipt && !request.hasPaid;
   };
 
   return (
@@ -185,12 +228,31 @@ const MyRequests = () => {
                   <div className="flex flex-col items-end gap-2">
                     <StatusBadge status={request.status} />
                     
-                    {!request.hasUploadedReceipt && !request.hasPaid && (
-                      <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => handlePayNow(request.id, e)}>
-                        <Upload className="mr-1 h-3 w-3" />
-                        Pay Now
-                      </Button>
-                    )}
+                    <div className="flex gap-2">
+                      {!request.hasUploadedReceipt && !request.hasPaid && (
+                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => handlePayNow(request.id, e)}>
+                          <Upload className="mr-1 h-3 w-3" />
+                          Pay Now
+                        </Button>
+                      )}
+                      
+                      {canCancelRequest(request) && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs h-7 text-red-600 hover:text-red-700 hover:bg-red-50" 
+                          onClick={(e) => handleCancelRequest(request.id, e)}
+                          disabled={cancellingRequestId === request.id}
+                        >
+                          {cancellingRequestId === request.id ? (
+                            <Loader className="mr-1 h-3 w-3 animate-spin" />
+                          ) : (
+                            <X className="mr-1 h-3 w-3" />
+                          )}
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -301,6 +363,23 @@ const MyRequests = () => {
                       Pay Now
                     </Button>
                   )}
+                  
+                  {canCancelRequest(selectedRequest) && (
+                    <Button 
+                      variant="outline"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleCancelRequest(selectedRequest.id)}
+                      disabled={cancellingRequestId === selectedRequest.id}
+                    >
+                      {cancellingRequestId === selectedRequest.id ? (
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <X className="mr-2 h-4 w-4" />
+                      )}
+                      Cancel Request
+                    </Button>
+                  )}
+                  
                   <Button
                     variant="outline"
                     onClick={closeRequestDetails}
