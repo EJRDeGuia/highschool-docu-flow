@@ -1,90 +1,66 @@
 
-# Local Development Setup Guide
+# 🚀 Local Development Setup Guide
 
-This guide will walk you through setting up the Pinagtongulan Integrated National Highschool Document Request System locally on your machine.
+This guide will help you set up the **Pinagtongulan Integrated National Highschool Document Request System** on your local machine.
 
-## Prerequisites
+## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed on your system:
+Make sure you have these installed:
 
-- **Node.js** (version 18 or higher) - [Download here](https://nodejs.org/)
-- **npm** or **yarn** package manager (comes with Node.js)
+- **Node.js** (v18 or higher) - [Download here](https://nodejs.org/)
 - **Git** - [Download here](https://git-scm.com/)
-- A **Supabase account** - [Sign up here](https://supabase.com/)
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
+- **Supabase account** - [Sign up here](https://supabase.com/)
 
-## Step 1: Clone the Repository
+## 🛠️ Quick Setup
 
-1. Open your terminal/command prompt
-2. Navigate to the directory where you want to store the project
-3. Clone the repository:
-   ```bash
-   git clone <your-repository-url>
-   cd document-request-system
-   ```
+### 1. Clone & Install
 
-## Step 2: Install Dependencies
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd document-request-system
 
-1. In the project root directory, install the required packages:
-   ```bash
-   npm install
-   ```
-   
-   Or if you prefer yarn:
-   ```bash
-   yarn install
-   ```
+# Install dependencies
+npm install
+```
 
-2. Wait for all dependencies to download and install (this may take a few minutes)
-
-## Step 3: Set Up Supabase Project
-
-### Create a New Supabase Project
+### 2. Create Supabase Project
 
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
-2. Click "New Project"
-3. Choose your organization
-4. Fill in the project details:
-   - **Name**: `document-request-system` (or any name you prefer)
-   - **Database Password**: Create a strong password (save this!)
-   - **Region**: Choose the closest region to your location
-5. Click "Create new project"
-6. Wait for the project to be created (this takes 2-3 minutes)
+2. Click **"New Project"**
+3. Fill in project details:
+   - **Name**: `document-request-system`
+   - **Database Password**: Create a strong password (save it!)
+   - **Region**: Choose closest to your location
+4. Click **"Create new project"** and wait 2-3 minutes
 
-### Get Your Supabase Credentials
+### 3. Configure Supabase
 
-1. Once your project is ready, go to **Settings** → **API**
-2. Copy the following values:
-   - **Project URL** (looks like: `https://your-project-ref.supabase.co`)
+#### Get Your Credentials
+1. Go to **Settings** → **API** in your Supabase dashboard
+2. Copy these values:
+   - **Project URL** (e.g., `https://xyz.supabase.co`)
    - **Anon public key** (starts with `eyJ...`)
 
-### Configure Authentication URLs
-
-1. In your Supabase dashboard, go to **Authentication** → **URL Configuration**
-2. Set the following URLs:
+#### Update Authentication URLs
+1. Go to **Authentication** → **URL Configuration**
+2. Set:
    - **Site URL**: `http://localhost:8080`
-   - **Redirect URLs**: Add `http://localhost:8080/**` (with the wildcard)
+   - **Redirect URLs**: `http://localhost:8080/**`
 
-## Step 4: Configure Environment Variables
+#### Update Client Configuration
+Replace the values in `src/integrations/supabase/client.ts`:
+```typescript
+const supabaseUrl = "your-project-url-here"
+const supabaseKey = "your-anon-key-here"
+```
 
-1. In the project root, locate the file `src/integrations/supabase/client.ts`
-2. The file should already be configured with the correct Supabase credentials
-3. If you need to update them, replace the values in the `createClient` function:
-   ```typescript
-   const supabaseUrl = "your-project-url-here"
-   const supabaseKey = "your-anon-key-here"
-   ```
+### 4. Set Up Database
 
-## Step 5: Set Up the Database Schema
-
-1. In your Supabase dashboard, go to **SQL Editor**
-2. Create a new query and run the following SQL to set up the database tables:
+In your Supabase **SQL Editor**, run this script:
 
 ```sql
--- Enable Row Level Security
-ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
-
--- Create profiles table for additional user data
+-- Create profiles table
 CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users PRIMARY KEY,
   name TEXT NOT NULL,
@@ -95,17 +71,16 @@ CREATE TABLE public.profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable RLS on profiles
+-- Enable RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Create policies for profiles
-CREATE POLICY "Users can view their own profile" ON public.profiles
+-- Create policies
+CREATE POLICY "Users can view own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own profile" ON public.profiles
+CREATE POLICY "Users can update own profile" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
--- Create document_types table
+-- Create document types table
 CREATE TABLE public.document_types (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
@@ -142,17 +117,15 @@ CREATE TABLE public.requests (
 -- Enable RLS on requests
 ALTER TABLE public.requests ENABLE ROW LEVEL SECURITY;
 
--- Create policies for requests
-CREATE POLICY "Users can view their own requests" ON public.requests
+-- Create request policies
+CREATE POLICY "Users can view own requests" ON public.requests
   FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can create their own requests" ON public.requests
+CREATE POLICY "Users can create own requests" ON public.requests
   FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own requests" ON public.requests
+CREATE POLICY "Users can update own requests" ON public.requests
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Create function to generate reference codes
+-- Create functions and triggers
 CREATE OR REPLACE FUNCTION generate_reference_code()
 RETURNS TEXT AS $$
 BEGIN
@@ -160,7 +133,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger to auto-generate reference codes
 CREATE OR REPLACE FUNCTION set_reference_code()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -176,7 +148,6 @@ CREATE TRIGGER set_reference_code_trigger
   FOR EACH ROW
   EXECUTE FUNCTION set_reference_code();
 
--- Create updated_at trigger
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -196,32 +167,31 @@ CREATE TRIGGER update_profiles_updated_at
   EXECUTE FUNCTION update_updated_at_column();
 ```
 
-3. Click "Run" to execute the SQL
+### 5. Create Test Users
 
-## Step 6: Create Test Users
+#### In Supabase Dashboard
+1. Go to **Authentication** → **Users**
+2. Click **"Add user"** and create these accounts:
 
-1. In the Supabase dashboard, go to **Authentication** → **Users**
-2. Click "Add user" and create test accounts:
+**Student Account:**
+- Email: `student@school.edu`
+- Password: `password123`
+- ✅ Email Confirmed
 
-### Admin User
-- **Email**: `admin@school.edu`
-- **Password**: `password123`
-- **Email Confirmed**: ✓ (check this box)
+**Registrar Account:**
+- Email: `registrar@school.edu`
+- Password: `password123`
+- ✅ Email Confirmed
 
-### Registrar User
-- **Email**: `registrar@school.edu`
-- **Password**: `password123`
-- **Email Confirmed**: ✓ (check this box)
+**Admin Account:**
+- Email: `admin@school.edu`
+- Password: `password123`
+- ✅ Email Confirmed
 
-### Student User
-- **Email**: `student@school.edu`
-- **Password**: `password123`
-- **Email Confirmed**: ✓ (check this box)
-
-3. After creating users, go to **SQL Editor** and run this to set up their profiles:
+#### Set User Profiles
+Run this in **SQL Editor** after creating users:
 
 ```sql
--- Insert profiles for test users (replace with actual user IDs from auth.users)
 INSERT INTO public.profiles (id, name, student_id, contact_number, role)
 SELECT 
   id,
@@ -244,125 +214,66 @@ FROM auth.users
 WHERE email IN ('admin@school.edu', 'registrar@school.edu', 'student@school.edu');
 ```
 
-## Step 7: Start the Development Server
+### 6. Start Development Server
 
-1. In your terminal, make sure you're in the project root directory
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
-   
-   Or with yarn:
-   ```bash
-   yarn dev
-   ```
+```bash
+npm run dev
+```
 
-3. The application should start and you'll see output similar to:
-   ```
-   Local:   http://localhost:8080
-   Network: http://192.168.x.x:8080
-   ```
+Your app will be available at: **http://localhost:8080**
 
-4. Open your web browser and navigate to `http://localhost:8080`
+## 🧪 Test the Application
 
-## Step 8: Test the Application
+### Login Credentials
 
-### Login with Test Accounts
+| Role | Email | Password | Access |
+|------|-------|----------|---------|
+| **Student** | `student@school.edu` | `password123` | Create/view requests |
+| **Registrar** | `registrar@school.edu` | `password123` | Manage/process requests |
+| **Admin** | `admin@school.edu` | `password123` | Full system access |
 
-1. **Student Account**:
-   - Email: `student@school.edu`
-   - Password: `password123`
-   - Can create and view requests
+### Test Features
 
-2. **Registrar Account**:
-   - Email: `registrar@school.edu`
-   - Password: `password123`
-   - Can manage and process requests
+1. **As Student**: Create document requests, upload receipts
+2. **As Registrar**: Process pending requests, update statuses  
+3. **As Admin**: Access all areas, manage users
 
-3. **Admin Account**:
-   - Email: `admin@school.edu`
-   - Password: `password123`
-   - Has full access to all features
+## 🚨 Troubleshooting
 
-### Test Basic Functionality
+### Common Issues
 
-1. **As a Student**:
-   - Create a new document request
-   - View your requests
-   - Upload a receipt
+**Build Errors:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
 
-2. **As a Registrar**:
-   - View all pending requests
-   - Update request status
-   - Verify payments
+**Database Connection Issues:**
+- Verify Supabase URL and API key
+- Check if project is active (not paused)
+- Ensure RLS policies are properly set
 
-3. **As an Admin**:
-   - Access all areas
-   - Manage users
-   - View system settings
-
-## Step 9: Enable Email Features (Optional)
-
-To test forgot password and email notifications:
-
-1. In Supabase dashboard, go to **Authentication** → **Settings**
-2. Configure SMTP settings or use the built-in email service
-3. Update the site URL and redirect URLs as needed
-
-## Troubleshooting
-
-### Common Issues and Solutions
-
-1. **"Cannot connect to Supabase"**
-   - Check that your Supabase project URL and anon key are correct
-   - Ensure your Supabase project is active (not paused)
-
-2. **"Access denied" errors**
-   - Verify that Row Level Security policies are set up correctly
-   - Check that test users have the correct roles in the profiles table
-
-3. **Page not loading**
-   - Make sure the development server is running
-   - Check the browser console for any JavaScript errors
-   - Verify that all dependencies are installed
-
-4. **Authentication issues**
-   - Check that redirect URLs are configured correctly in Supabase
-   - Ensure users have confirmed email addresses
-
-5. **Database errors**
-   - Verify all SQL commands ran successfully
-   - Check the Supabase logs for any database errors
+**Authentication Problems:**
+- Confirm redirect URLs in Supabase settings
+- Check email confirmation status for test users
 
 ### Getting Help
 
-If you encounter issues:
+- Check browser console (F12) for error messages
+- Review Supabase logs in dashboard
+- Ensure all SQL scripts ran successfully
 
-1. Check the browser console (F12) for error messages
-2. Check the terminal where you're running the dev server for errors
-3. Look at the Supabase dashboard logs
-4. Refer to the [Supabase documentation](https://supabase.com/docs)
-5. Check the [Vite documentation](https://vitejs.dev/) for build issues
+## 🎯 Next Steps
 
-## Development Tips
-
-1. **Hot Reload**: The development server supports hot reload, so changes will appear automatically
-2. **Database Changes**: If you modify the database schema, restart the dev server
-3. **Environment**: Always use the development environment for testing
-4. **Backup**: Regularly backup your Supabase project data during development
-
-## Next Steps
-
-Once you have the application running locally:
-
+Once running locally:
 1. Explore the codebase structure
-2. Make your desired modifications
-3. Test thoroughly with different user roles
-4. Consider setting up additional features like file storage
-5. Deploy to production when ready
+2. Test all user roles and features
+3. Make your desired modifications
+4. Deploy to production when ready
 
 ---
 
-**Happy coding!** 🚀
+**Ready to code!** 🎉
 
-For additional questions or support, refer to the project documentation or contact the development team.
+Need help? Check the [Supabase docs](https://supabase.com/docs) or [Vite docs](https://vitejs.dev/).
