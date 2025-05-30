@@ -89,21 +89,21 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-gray-50 text-gray-900 antialiased;
     font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-foreground font-semibold tracking-tight;
+    @apply text-gray-900 font-semibold tracking-tight;
   }
   
   /* Improved focus styles */
   *:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-white;
   }
 }
 
@@ -131,11 +131,11 @@
   
   /* Card and layout components */
   .card-shadow {
-    @apply shadow-md border border-border bg-card rounded-lg transition-all duration-300;
+    @apply shadow-md border border-gray-200 bg-white rounded-lg transition-all duration-300;
   }
   
   .card-hover {
-    @apply hover:shadow-lg hover:border-primary/30 transition-all duration-200;
+    @apply hover:shadow-lg hover:border-blue-300 transition-all duration-200;
   }
   
   .dashboard-card {
@@ -152,7 +152,7 @@
   }
   
   .input-label {
-    @apply block text-sm font-medium text-foreground;
+    @apply block text-sm font-medium text-gray-700;
   }
   
   /* Animation for loading shimmer effect */
@@ -163,22 +163,22 @@
 
   /* Improved text gradient */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
   }
 
   /* Button styles */
   .btn-gradient {
-    @apply bg-gradient-to-r from-primary to-blue-500 hover:from-blue-500 hover:to-primary text-primary-foreground shadow-md transition-all duration-200;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-md transition-all duration-200;
   }
 
   /* Card styles */
   .card-gradient {
-    @apply bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm;
   }
 
   /* Glassmorphism effect */
   .glass {
-    @apply bg-background/80 backdrop-blur-lg border border-border rounded-lg;
+    @apply bg-white/80 backdrop-blur-lg border border-gray-200 rounded-lg;
   }
 
   /* Enhanced shadows */
@@ -196,7 +196,7 @@
   
   /* Text styles */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
   }
   
   /* Card effects */
