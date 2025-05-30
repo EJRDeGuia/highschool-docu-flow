@@ -104,7 +104,7 @@
   
   /* Improved focus styles */
   *:focus-visible {
-    @apply outline-none ring-2 ring-school-primary ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-white;
   }
 }
 
@@ -136,7 +136,7 @@
   }
   
   .card-hover {
-    @apply hover:shadow-lg hover:border-school-primary/30 transition-all duration-200;
+    @apply hover:shadow-lg hover:border-blue-300 transition-all duration-200;
   }
   
   .dashboard-card {
@@ -164,12 +164,12 @@
 
   /* Improved text gradient */
   .text-gradient {
-    @apply bg-gradient-to-r from-school-primary to-school-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
   }
 
   /* Button styles */
   .btn-gradient {
-    @apply bg-gradient-to-r from-school-primary to-school-secondary hover:from-school-secondary hover:to-school-primary text-white shadow-md transition-all duration-200;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-md transition-all duration-200;
   }
 
   /* Card styles */
@@ -197,7 +197,7 @@
   
   /* Text styles */
   .text-gradient {
-    @apply bg-gradient-to-r from-school-primary to-school-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
   }
   
   /* Card effects */
