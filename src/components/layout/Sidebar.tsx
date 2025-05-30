@@ -101,15 +101,15 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-white/20">
+      <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
         <div className={cn("flex items-center space-x-3", !isOpen && "md:justify-center")}>
-          <div className="p-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg">
+          <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
           {(isOpen || window.innerWidth < 768) && (
             <div>
               <h1 className="font-bold text-lg text-gradient">PINHS</h1>
-              <p className="text-xs text-gray-600">Document System</p>
+              <p className="text-xs text-gray-500">Document System</p>
             </div>
           )}
         </div>
@@ -118,23 +118,23 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
           variant="ghost" 
           size="icon"
           onClick={() => setIsOpen(false)}
-          className="md:hidden"
+          className="md:hidden text-gray-500 hover:text-gray-700 hover:bg-gray-100"
         >
           <X className="h-5 w-5" />
         </Button>
       </div>
       
       {/* Navigation */}
-      <nav className="px-4 py-6 space-y-2">
+      <nav className="px-4 py-6 space-y-1">
         {filteredNavItems.map((item) => (
           <Button
             key={item.href}
             variant="ghost"
             className={cn(
-              "w-full justify-start text-sm font-medium transition-all duration-200 h-12",
+              "w-full justify-start text-sm font-medium transition-all duration-200 h-11 rounded-lg",
               pathname === item.href 
-                ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg hover:shadow-xl" 
-                : "text-gray-700 hover:bg-white/50",
+                ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-sm" 
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
               !isOpen && "md:justify-center md:px-0"
             )}
             onClick={() => {
@@ -153,20 +153,20 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       </nav>
       
       {/* User Profile */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/20">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200/50">
         <div 
-          className="flex items-center space-x-3 cursor-pointer hover:bg-white/30 p-3 rounded-lg transition-all duration-200"
+          className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200"
           onClick={handleProfileClick}
         >
           <div className="flex-shrink-0">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold shadow-lg">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg">
               {user?.name.charAt(0).toUpperCase()}
             </div>
           </div>
           {(isOpen || window.innerWidth < 768) && (
             <div className="overflow-hidden">
               <p className="font-semibold text-sm truncate text-gray-800">{user?.name}</p>
-              <p className="text-xs text-gray-600 truncate capitalize">{user?.role}</p>
+              <p className="text-xs text-gray-500 truncate capitalize">{user?.role}</p>
             </div>
           )}
         </div>

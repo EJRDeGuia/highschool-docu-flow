@@ -99,19 +99,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8 fade-in">
           <div className="flex justify-center mb-4">
-            <div className="p-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl shadow-lg">
+            <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
               <GraduationCap className="h-12 w-12 text-white" />
             </div>
           </div>
@@ -124,7 +117,7 @@ const Login = () => {
         </div>
         
         {/* Login Card */}
-        <Card className="card-glass border-0 shadow-2xl">
+        <Card className="card-glass border-0 shadow-xl">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-2xl font-bold text-gray-800">Welcome Back</CardTitle>
             <CardDescription className="text-gray-600">
@@ -183,14 +176,14 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
                   Forgot password?
                 </button>
               </div>
               
               {/* Demo Credentials */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+              <div className="bg-gradient-to-r from-blue-50 to-slate-50 p-4 rounded-lg border border-blue-200">
                 <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
                 <div className="grid grid-cols-1 gap-1 text-xs text-gray-600">
                   <div>👨‍🎓 Student: student@school.edu</div>
