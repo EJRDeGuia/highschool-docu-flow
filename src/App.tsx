@@ -11,7 +11,6 @@ import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import MyRequests from "./pages/MyRequests";
 import NewRequest from "./pages/NewRequest";
@@ -69,7 +68,6 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
       
       {/* Protected routes for all authenticated users */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

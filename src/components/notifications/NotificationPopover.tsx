@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Bell, BellDot } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Popover,
@@ -20,77 +20,61 @@ export const NotificationPopover = () => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative h-12 w-12 rounded-xl bg-white hover:bg-gray-50 transition-colors border border-gray-200/70 shadow-sm"
-        >
-          {unreadCount > 0 ? (
-            <BellDot className="h-6 w-6 text-blue-600" />
-          ) : (
-            <Bell className="h-6 w-6 text-gray-600" />
-          )}
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 
-              className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 text-xs font-bold bg-red-500 hover:bg-red-600 text-white border-2 border-white"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500"
               variant="destructive"
             >
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[420px] p-0 bg-white border border-gray-200/70 shadow-2xl rounded-xl" align="end">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
-          <div className="space-y-1">
-            <h4 className="font-bold text-gray-900 text-lg">Notifications</h4>
-            <p className="text-base text-gray-600">
-              {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up!'}
-            </p>
-          </div>
+      <PopoverContent className="w-80 p-0" align="end">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h4 className="font-medium">Notifications</h4>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-sm h-10 px-4 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg font-medium"
+              className="text-xs h-auto py-1"
               onClick={() => {
                 markAllAsRead();
               }}
             >
-              Mark all read
+              Mark all as read
             </Button>
           )}
         </div>
-        <ScrollArea className="h-96">
+        <ScrollArea className="h-[400px]">
           {notifications.length > 0 ? (
             <div className="divide-y divide-gray-100">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-6 cursor-pointer transition-colors hover:bg-gray-50 ${
-                    !notification.read ? 'bg-blue-50/30 border-l-4 border-l-blue-500' : ''
+                  className={`p-4 hover:bg-gray-50 cursor-pointer ${
+                    !notification.read ? 'bg-blue-50' : ''
                   }`}
                   onClick={() => {
                     markAsRead(notification.id);
                     if (notification.action) {
                       setIsOpen(false);
+                      // Could navigate or perform action here
                     }
                   }}
                 >
                   <div className="flex gap-4">
                     <div 
-                      className={`h-3 w-3 mt-2 rounded-full flex-shrink-0 ${
-                        notification.read ? 'bg-gray-300' : 'bg-blue-500'
+                      className={`h-2 w-2 mt-2 rounded-full flex-shrink-0 ${
+                        notification.read ? 'bg-transparent' : 'bg-school-primary'
                       }`} 
                     />
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <p className="text-base font-semibold text-gray-900">
-                        {notification.title}
-                      </p>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-500 font-medium">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium break-words">{notification.title}</p>
+                      <p className="text-sm text-gray-500 mt-1 break-words">{notification.message}</p>
+                      <p className="text-xs text-gray-400 mt-1">
                         {new Date(notification.timestamp).toLocaleString()}
                       </p>
                     </div>
@@ -99,12 +83,9 @@ export const NotificationPopover = () => {
               ))}
             </div>
           ) : (
-            <div className="p-12 text-center text-gray-500">
-              <Bell className="h-16 w-16 mx-auto mb-6 text-gray-300" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-3">All clear!</h3>
-              <p className="text-base text-gray-500">
-                No notifications at the moment.
-              </p>
+            <div className="p-8 text-center text-gray-500">
+              <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-sm">No notifications yet</p>
             </div>
           )}
         </ScrollArea>
