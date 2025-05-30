@@ -8,6 +8,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import PageHeader from "../components/shared/PageHeader";
 import { UserCog, Save, UserCheck, AlertCircle } from "lucide-react";
 
