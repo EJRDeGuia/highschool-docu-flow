@@ -20,10 +20,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center card-glass p-12 max-w-sm mx-auto">
-          <Loader className="h-12 w-12 animate-spin text-purple-600 mb-6" />
+          <Loader className="h-12 w-12 animate-spin text-blue-600 mb-6" />
           <p className="text-gray-700 font-medium text-lg">Loading your dashboard...</p>
           <div className="mt-4 w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse"></div>
+            <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }
   
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Sidebar */}
       <div className={`fixed md:static z-40 h-full transition-all duration-300 ${
         isSidebarOpen ? 'w-64' : 'w-0 md:w-20'
@@ -57,7 +57,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto page-content">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

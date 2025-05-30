@@ -69,154 +69,163 @@ const Profile = () => {
   
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         <PageHeader 
           title="My Profile" 
           description="View and manage your account information"
         />
         
-        <div className="mt-8 grid gap-8">
-          {/* Profile Card */}
-          <Card className="overflow-hidden border-0 shadow-md">
-            <CardHeader className="bg-gradient-to-r from-school-primary to-school-secondary text-white">
-              <div className="flex items-center gap-6">
-                <Avatar className="h-20 w-20 border-4 border-white/20">
-                  <AvatarImage src={user?.avatar} />
-                  <AvatarFallback className="bg-white text-school-primary text-xl">
-                    {user ? getInitials(user.name) : "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm text-white/80">Welcome back</p>
-                  <CardTitle className="text-2xl mt-1">{user?.name}</CardTitle>
-                  <p className="text-sm mt-1 text-white/80 capitalize">{user?.role}</p>
+        {/* Profile Card with enhanced visual hierarchy */}
+        <Card className="card-glass border-0 shadow-card overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8">
+            <div className="flex items-center gap-6">
+              <Avatar className="h-24 w-24 border-4 border-white/20 shadow-lg">
+                <AvatarImage src={user?.avatar} />
+                <AvatarFallback className="bg-white text-blue-600 text-xl font-bold">
+                  {user ? getInitials(user.name) : "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm text-blue-100 mb-1">Welcome back</p>
+                <CardTitle className="text-3xl font-bold text-white mb-2">{user?.name}</CardTitle>
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white">
+                  <span className="capitalize">{user?.role}</span>
                 </div>
               </div>
-            </CardHeader>
-            
-            <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium">Account Information</h3>
-                  {canEdit && (
-                    <Button 
-                      type="button"
-                      variant={isEditing ? "outline" : "default"}
-                      onClick={() => setIsEditing(!isEditing)}
-                    >
-                      {isEditing ? (
-                        <>Cancel</>
-                      ) : (
-                        <>
-                          <UserCog className="mr-2 h-4 w-4" />
-                          Edit Profile
-                        </>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-gray-900">Account Information</h3>
+                {canEdit && (
+                  <Button 
+                    type="button"
+                    variant={isEditing ? "outline" : "default"}
+                    onClick={() => setIsEditing(!isEditing)}
+                    className={isEditing ? "btn-glass" : "btn-gradient"}
+                  >
+                    {isEditing ? (
+                      <>Cancel</>
+                    ) : (
+                      <>
+                        <UserCog className="mr-2 h-4 w-4" />
+                        Edit Profile
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+              
+              <div className="grid gap-8">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className={cn(
+                        "input-glass h-12",
+                        !isEditing && "bg-gray-50/80 text-gray-600"
                       )}
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="grid gap-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
-                      />
-                    </div>
+                    />
                   </div>
                   
-                  {user?.role === "student" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="studentId">Student ID</Label>
-                      <Input
-                        id="studentId"
-                        value={user.studentId || ""}
-                        disabled
-                        className="bg-gray-50"
-                      />
-                    </div>
-                  )}
-                  
-                  {isEditing && canEdit && (
-                    <>
-                      <div className="pt-4 border-t">
-                        <h4 className="font-medium mb-4">Change Password</h4>
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label htmlFor="password">New Password</Label>
-                            <Input
-                              id="password"
-                              name="password"
-                              type="password"
-                              value={formData.password}
-                              onChange={handleInputChange}
-                              placeholder="Leave blank to keep current"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                            <Input
-                              id="confirmPassword"
-                              name="confirmPassword"
-                              type="password"
-                              value={formData.confirmPassword}
-                              onChange={handleInputChange}
-                            />
-                          </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className={cn(
+                        "input-glass h-12",
+                        !isEditing && "bg-gray-50/80 text-gray-600"
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {user?.role === "student" && (
+                  <div className="space-y-3">
+                    <Label htmlFor="studentId" className="text-sm font-medium text-gray-700">Student ID</Label>
+                    <Input
+                      id="studentId"
+                      value={user.studentId || ""}
+                      disabled
+                      className="input-glass h-12 bg-gray-50/80 text-gray-600"
+                    />
+                  </div>
+                )}
+                
+                {isEditing && canEdit && (
+                  <>
+                    <div className="pt-6 border-t border-gray-200">
+                      <h4 className="font-semibold mb-6 text-gray-900">Change Password</h4>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label htmlFor="password" className="text-sm font-medium text-gray-700">New Password</Label>
+                          <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            placeholder="Leave blank to keep current"
+                            className="input-glass h-12"
+                          />
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirm New Password</Label>
+                          <Input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type="password"
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            className="input-glass h-12"
+                          />
                         </div>
                       </div>
-                      
-                      <div className="flex justify-end pt-4">
-                        <Button type="submit">
-                          <Save className="mr-2 h-4 w-4" />
-                          Save Changes
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                  
-                  {!canEdit && (
-                    <div className="bg-amber-50 text-amber-700 rounded-lg p-4 flex items-start">
-                      <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm">
-                        Only administrators can edit profile information. Please contact an administrator if you need to update your information.
-                      </p>
                     </div>
-                  )}
-                  
-                  {!isEditing && canEdit && (
-                    <div className="bg-blue-50 text-blue-700 rounded-lg p-4 flex items-start">
-                      <UserCheck className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm">
-                        You can update profile information by clicking the "Edit Profile" button above.
-                      </p>
+                    
+                    <div className="flex justify-end pt-6">
+                      <Button type="submit" className="btn-gradient">
+                        <Save className="mr-2 h-4 w-4" />
+                        Save Changes
+                      </Button>
                     </div>
-                  )}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+                  </>
+                )}
+                
+                {!canEdit && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 flex items-start">
+                    <AlertCircle className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">
+                      Only administrators can edit profile information. Please contact an administrator if you need to update your information.
+                    </p>
+                  </div>
+                )}
+                
+                {!isEditing && canEdit && (
+                  <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-xl p-4 flex items-start">
+                    <UserCheck className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm">
+                      You can update profile information by clicking the "Edit Profile" button above.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

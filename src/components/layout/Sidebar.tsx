@@ -101,7 +101,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200/50">
         <div className={cn("flex items-center space-x-3", !isOpen && "md:justify-center")}>
           <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
             <GraduationCap className="h-6 w-6 text-white" />
@@ -125,7 +125,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       </div>
       
       {/* Navigation */}
-      <nav className="px-4 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-1">
         {filteredNavItems.map((item) => (
           <Button
             key={item.href}
@@ -152,23 +152,25 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
         ))}
       </nav>
       
-      {/* User Profile */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200/50">
-        <div 
-          className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200"
-          onClick={handleProfileClick}
-        >
-          <div className="flex-shrink-0">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg">
-              {user?.name.charAt(0).toUpperCase()}
+      {/* User Profile - Fixed positioning and styling */}
+      <div className="p-4 border-t border-gray-200/50 mt-auto">
+        <div className="user-profile-section">
+          <div 
+            className="flex items-center space-x-3 cursor-pointer hover:bg-white/50 p-2 rounded-lg transition-all duration-200"
+            onClick={handleProfileClick}
+          >
+            <div className="flex-shrink-0">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-md">
+                {user?.name.charAt(0).toUpperCase()}
+              </div>
             </div>
+            {(isOpen || window.innerWidth < 768) && (
+              <div className="overflow-hidden min-w-0">
+                <p className="font-semibold text-xs truncate text-gray-800">{user?.name}</p>
+                <p className="text-xs text-gray-500 truncate capitalize">{user?.role}</p>
+              </div>
+            )}
           </div>
-          {(isOpen || window.innerWidth < 768) && (
-            <div className="overflow-hidden">
-              <p className="font-semibold text-sm truncate text-gray-800">{user?.name}</p>
-              <p className="text-xs text-gray-500 truncate capitalize">{user?.role}</p>
-            </div>
-          )}
         </div>
       </div>
     </aside>
