@@ -106,12 +106,12 @@
   }
   
   .status-completed {
-    @apply bg-emerald-100 text-emerald-800 border border-emerald-300 font-medium px-3 py-1 rounded-full text-sm;
+    @apply bg-green-100 text-green-800 border border-green-300 font-medium px-3 py-1 rounded-full text-sm;
   }
   
   /* Enhanced card components */
   .card-modern {
-    @apply bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-blue-300/50;
+    @apply bg-white backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-blue-300;
   }
   
   .card-interactive {
@@ -120,11 +120,11 @@
   
   /* Form styling improvements */
   .form-container {
-    @apply space-y-6 p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50;
+    @apply space-y-6 p-6 bg-white backdrop-blur-sm rounded-xl border border-gray-200;
   }
   
   .input-modern {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/90;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
   }
   
   .btn-primary {
@@ -132,16 +132,16 @@
   }
   
   .btn-secondary {
-    @apply bg-white/90 hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 rounded-lg border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   /* Dashboard specific styles */
   .dashboard-header {
-    @apply bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-6 py-4;
+    @apply bg-white backdrop-blur-sm border-b border-gray-200 px-6 py-4;
   }
   
   .sidebar-modern {
-    @apply bg-white/90 backdrop-blur-md border-r border-gray-200/50;
+    @apply bg-white backdrop-blur-md border-r border-gray-200;
   }
   
   /* Loading animation */
@@ -166,13 +166,13 @@
   }
   
   .page-header {
-    @apply border-b border-gray-200/50 pb-6 mb-8;
+    @apply border-b border-gray-200 pb-6 mb-8;
   }
 }
 
 @layer utilities {
   .glass-effect {
-    @apply bg-white/20 backdrop-blur-lg border border-white/30;
+    @apply bg-white border border-white;
   }
   
   .hover-lift {
