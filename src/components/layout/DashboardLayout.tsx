@@ -38,10 +38,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }
   
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50">
+    <div className="min-h-screen flex bg-gradient-to-br from-gray-50/80 via-blue-50/50 to-indigo-50/30">
       {/* Sidebar */}
       <div className={`fixed md:static z-40 h-full transition-all duration-300 ease-in-out ${
-        isSidebarOpen ? 'w-72' : 'w-0 md:w-20'
+        isSidebarOpen ? 'w-80' : 'w-0 md:w-20'
       }`}>
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       </div>
@@ -49,7 +49,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 md:hidden transition-all duration-300"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden transition-all duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -58,9 +58,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-6 py-8 lg:px-8">
-            <div className="space-y-8">
+        <main className="flex-1 overflow-y-auto bg-gradient-to-br from-white/30 to-blue-50/20">
+          <div className="max-w-8xl mx-auto px-8 py-12 lg:px-12">
+            <div className="space-y-12">
               {children}
             </div>
           </div>

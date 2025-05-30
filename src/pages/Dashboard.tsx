@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -121,8 +120,8 @@ const Dashboard = () => {
       title: "Pending Approval",
       value: stats.pendingRequests,
       icon: Clock,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
       highlight: stats.pendingRequests > 0,
     },
     {
@@ -144,14 +143,14 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            <div className="h-10 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse"></div>
+              <div key={i} className="h-40 bg-gray-200 rounded-xl animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -161,7 +160,7 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-12">
         <PageHeader
           title={`${getGreeting()}, ${user?.name?.split(' ')[0]}!`}
           description="Here's an overview of your document requests and system activity"
@@ -175,22 +174,22 @@ const Dashboard = () => {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {statCards.map((stat) => (
-            <Card key={stat.title} className={`border-0 shadow-sm hover:shadow-md transition-shadow ${stat.highlight ? 'ring-2 ring-yellow-200 bg-yellow-50/50' : 'bg-white'}`}>
-              <CardContent className="p-6">
+            <Card key={stat.title} className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl ${stat.highlight ? 'ring-2 ring-orange-200 bg-orange-50/50' : 'bg-white'}`}>
+              <CardContent className="p-8">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
+                  <div className="space-y-3">
+                    <p className="text-base font-semibold text-gray-600">{stat.title}</p>
+                    <p className="text-4xl font-bold text-gray-900">{stat.value}</p>
                   </div>
-                  <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                  <div className={`p-4 rounded-2xl ${stat.bgColor}`}>
+                    <stat.icon className={`h-8 w-8 ${stat.color}`} />
                   </div>
                 </div>
                 {stat.highlight && (
-                  <div className="mt-3 flex items-center text-sm text-yellow-700">
-                    <Bell className="h-4 w-4 mr-1" />
+                  <div className="mt-4 flex items-center text-sm text-orange-700 bg-orange-100 px-3 py-2 rounded-lg">
+                    <Bell className="h-4 w-4 mr-2" />
                     Needs attention
                   </div>
                 )}
@@ -200,14 +199,14 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-4">
+            <Card className="border-0 shadow-lg rounded-xl bg-white">
+              <CardHeader className="pb-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-semibold text-gray-900">Recent Requests</CardTitle>
-                    <CardDescription className="text-gray-600">
+                  <div className="space-y-2">
+                    <CardTitle className="text-2xl font-bold text-gray-900">Recent Requests</CardTitle>
+                    <CardDescription className="text-base text-gray-600">
                       Latest document request submissions
                     </CardDescription>
                   </div>
@@ -215,7 +214,7 @@ const Dashboard = () => {
                     variant="outline" 
                     size="sm"
                     onClick={() => navigate(user?.role === 'student' ? '/dashboard/my-requests' : '/dashboard/manage-requests')}
-                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50 px-6 py-3 h-auto"
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     View All
@@ -223,20 +222,20 @@ const Dashboard = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {recentRequests.length > 0 ? (
                     recentRequests.map((request) => (
-                      <div key={request.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex items-center space-x-4">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <FileText className="h-5 w-5 text-blue-600" />
+                      <div key={request.id} className="flex items-center justify-between p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center space-x-6">
+                          <div className="p-3 bg-blue-100 rounded-xl">
+                            <FileText className="h-6 w-6 text-blue-600" />
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{request.type}</p>
+                          <div className="space-y-1">
+                            <p className="font-semibold text-gray-900 text-base">{request.type}</p>
                             {request.studentName && (
                               <p className="text-sm text-gray-600">by {request.studentName}</p>
                             )}
-                            <p className="text-xs text-gray-500">
+                            <p className="text-sm text-gray-500">
                               {new Date(request.submittedAt).toLocaleDateString()}
                             </p>
                           </div>
@@ -245,9 +244,9 @@ const Dashboard = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No recent requests</p>
+                    <div className="text-center py-12 text-gray-500">
+                      <FileText className="h-16 w-16 mx-auto mb-6 text-gray-300" />
+                      <p className="text-lg">No recent requests</p>
                     </div>
                   )}
                 </div>
@@ -256,46 +255,46 @@ const Dashboard = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="space-y-6">
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900">Quick Actions</CardTitle>
+          <div className="space-y-8">
+            <Card className="border-0 shadow-lg rounded-xl bg-white">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl font-bold text-gray-900">Quick Actions</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 space-y-3">
+              <CardContent className="pt-0 space-y-4">
                 {user?.role === 'student' ? (
                   <>
                     <Button 
-                      className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
+                      className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white h-12 text-base"
                       onClick={() => navigate("/dashboard/new-request")}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-5 w-5 mr-3" />
                       Submit New Request
                     </Button>
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start"
+                      className="w-full justify-start h-12 text-base"
                       onClick={() => navigate("/dashboard/my-requests")}
                     >
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="h-5 w-5 mr-3" />
                       View My Requests
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button 
-                      className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
+                      className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white h-12 text-base"
                       onClick={() => navigate("/dashboard/manage-requests")}
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="h-5 w-5 mr-3" />
                       Review Requests
                     </Button>
                     {user?.role === 'admin' && (
                       <Button 
                         variant="outline" 
-                        className="w-full justify-start"
+                        className="w-full justify-start h-12 text-base"
                         onClick={() => navigate("/dashboard/users")}
                       >
-                        <Users className="h-4 w-4 mr-2" />
+                        <Users className="h-5 w-5 mr-3" />
                         Manage Users
                       </Button>
                     )}
@@ -304,13 +303,13 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <TrendingUp className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 mb-2">System Status</h3>
-                  <p className="text-sm text-gray-600 mb-4">All services operational</p>
-                  <Badge className="bg-green-100 text-green-800 border-green-200">
+            <Card className="border-0 shadow-lg rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+              <CardContent className="p-8">
+                <div className="text-center space-y-4">
+                  <TrendingUp className="h-12 w-12 text-blue-600 mx-auto" />
+                  <h3 className="font-bold text-gray-900 text-lg">System Status</h3>
+                  <p className="text-base text-gray-600">All services operational</p>
+                  <Badge className="bg-green-100 text-green-800 border-green-200 px-4 py-2 text-sm">
                     Healthy
                   </Badge>
                 </div>
