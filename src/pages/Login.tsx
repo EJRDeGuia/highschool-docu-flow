@@ -8,19 +8,20 @@ import { Label } from "../components/ui/label";
 import { Checkbox } from "../components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, Loader } from "lucide-react";
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
+  const {
+    login
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email || !password) {
       toast({
         title: "Error",
@@ -29,15 +30,12 @@ const Login = () => {
       });
       return;
     }
-    
     setIsSubmitting(true);
-    
     try {
       await login(email, password, rememberMe);
-      
       toast({
         title: "Success",
-        description: "You have successfully logged in",
+        description: "You have successfully logged in"
       });
       navigate("/dashboard");
     } catch (error) {
@@ -50,21 +48,16 @@ const Login = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleForgotPassword = () => {
     toast({
       title: "Forgot Password",
-      description: "Please contact the administrator to reset your password",
+      description: "Please contact the administrator to reset your password"
     });
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-school-background p-4">
+  return <div className="min-h-screen flex items-center justify-center bg-school-background p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-school-primary">
-            School Document Request System
-          </h1>
+          <h1 className="text-3xl font-bold text-school-primary">Pinagtongulan Integrated National Highschool Document Request System</h1>
           <p className="text-gray-600 mt-2">
             Login to manage your document requests
           </p>
@@ -81,43 +74,21 @@ const Login = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@school.edu"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <Input id="email" type="email" placeholder="you@school.edu" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
               </div>
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                  />
+                  <Checkbox id="remember" checked={rememberMe} onCheckedChange={checked => setRememberMe(checked as boolean)} />
                   <Label htmlFor="remember" className="text-sm">
                     Remember me
                   </Label>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-sm text-school-primary hover:underline"
-                >
+                <button type="button" onClick={handleForgotPassword} className="text-sm text-school-primary hover:underline">
                   Forgot password?
                 </button>
               </div>
@@ -133,24 +104,14 @@ const Login = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <ArrowRight className="mr-2 h-4 w-4" />
-                )}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
                 Login
               </Button>
             </CardFooter>
           </form>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Login;
