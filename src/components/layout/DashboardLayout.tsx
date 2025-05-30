@@ -18,10 +18,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   // If loading, show loading spinner
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <Loader className="h-12 w-12 animate-spin text-school-primary" />
-          <p className="mt-6 text-gray-600 font-medium">Loading your dashboard...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center card-glass p-12 max-w-sm mx-auto">
+          <Loader className="h-12 w-12 animate-spin text-purple-600 mb-6" />
+          <p className="text-gray-700 font-medium text-lg">Loading your dashboard...</p>
+          <div className="mt-4 w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full animate-pulse"></div>
+          </div>
         </div>
       </div>
     );
@@ -34,16 +37,30 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }
   
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
-      <div className={`fixed md:static z-40 ${isSidebarOpen ? 'w-64' : 'w-0 md:w-20'} transition-all duration-300`}>
+    <div className="min-h-screen flex">
+      {/* Sidebar */}
+      <div className={`fixed md:static z-40 h-full transition-all duration-300 ${
+        isSidebarOpen ? 'w-64' : 'w-0 md:w-20'
+      }`}>
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       </div>
       
-      <div className="flex-1 flex flex-col min-h-screen md:ml-0">
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
-        <main className={`flex-1 p-5 md:p-8 overflow-y-auto transition-all duration-300 ${isSidebarOpen ? 'md:ml-0' : 'md:ml-0'}`}>
-          {children}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

@@ -16,7 +16,8 @@ import {
   Database,
   Receipt,
   X,
-  Check
+  Check,
+  GraduationCap
 } from "lucide-react";
 
 interface SidebarProps {
@@ -24,7 +25,6 @@ interface SidebarProps {
   setIsOpen: (value: boolean) => void;
 }
 
-// Define the navigation item type for better type safety
 interface NavItem {
   name: string;
   href: string;
@@ -37,7 +37,6 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   
-  // Define navigation items based on user role
   const navItems: NavItem[] = [
     {
       name: "Dashboard",
@@ -79,16 +78,14 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       name: "Settings",
       href: "/dashboard/settings",
       icon: Settings,
-      roles: ["admin"], // Restrict Settings to admin only
+      roles: ["admin"],
     },
   ];
   
-  // Filter nav items based on user role
   const filteredNavItems = user?.role 
     ? navItems.filter(item => item.roles.includes(user.role as UserRole))
     : [];
     
-  // Handle navigation to profile
   const handleProfileClick = () => {
     navigate("/dashboard/profile");
     if (window.innerWidth < 768) {
@@ -97,85 +94,84 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   };
   
   return (
-    <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-20 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
+    <aside 
+      className={cn(
+        "fixed top-0 left-0 z-40 h-full transition-all duration-300 md:relative md:translate-x-0 sidebar-glass",
+        isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 md:w-20"
       )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b border-white/20">
+        <div className={cn("flex items-center space-x-3", !isOpen && "md:justify-center")}>
+          <div className="p-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg">
+            <GraduationCap className="h-6 w-6 text-white" />
+          </div>
+          {(isOpen || window.innerWidth < 768) && (
+            <div>
+              <h1 className="font-bold text-lg text-gradient">PINHS</h1>
+              <p className="text-xs text-gray-600">Document System</p>
+            </div>
+          )}
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={() => setIsOpen(false)}
+          className="md:hidden"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
       
-      {/* Sidebar */}
-      <aside 
-        className={cn(
-          "fixed top-0 left-0 z-30 h-full w-64 bg-white shadow-lg border-r border-gray-100 transition-transform duration-300 md:relative md:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        {/* Mobile close button */}
-        <div className="flex items-center justify-between p-4 md:hidden">
-          <h1 className="font-semibold text-lg text-blue-600">Pinagtongulan INHS</h1>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => setIsOpen(false)}
+      {/* Navigation */}
+      <nav className="px-4 py-6 space-y-2">
+        {filteredNavItems.map((item) => (
+          <Button
+            key={item.href}
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-sm font-medium transition-all duration-200 h-12",
+              pathname === item.href 
+                ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg hover:shadow-xl" 
+                : "text-gray-700 hover:bg-white/50",
+              !isOpen && "md:justify-center md:px-0"
+            )}
+            onClick={() => {
+              navigate(item.href);
+              if (window.innerWidth < 768) {
+                setIsOpen(false);
+              }
+            }}
           >
-            <X className="h-5 w-5" />
+            <item.icon className={cn("h-5 w-5", isOpen ? "mr-3" : "md:mr-0")} />
+            {(isOpen || window.innerWidth < 768) && (
+              <span className="truncate">{item.name}</span>
+            )}
           </Button>
-        </div>
-        
-        {/* Logo (desktop) */}
-        <div className="hidden md:flex items-center h-16 px-6 border-b border-gray-100">
-          <h1 className="font-semibold text-lg text-blue-600">Pinagtongulan INHS</h1>
-        </div>
-        
-        {/* Navigation */}
-        <nav className="px-3 py-4">
-          <div className="space-y-1">
-            {filteredNavItems.map((item) => (
-              <Button
-                key={item.href}
-                variant={pathname === item.href ? "default" : "ghost"}
-                className={cn(
-                  "w-full justify-start text-sm font-medium",
-                  pathname === item.href 
-                    ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-gray-700 hover:bg-gray-100"
-                )}
-                onClick={() => {
-                  navigate(item.href);
-                  if (window.innerWidth < 768) {
-                    setIsOpen(false);
-                  }
-                }}
-              >
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.name}
-              </Button>
-            ))}
-          </div>
-        </nav>
-        
-        {/* User info (at bottom) */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white shadow-inner">
-          <div 
-            className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
-            onClick={handleProfileClick}
-          >
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md">
-                {user?.name.charAt(0).toUpperCase()}
-              </div>
+        ))}
+      </nav>
+      
+      {/* User Profile */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/20">
+        <div 
+          className="flex items-center space-x-3 cursor-pointer hover:bg-white/30 p-3 rounded-lg transition-all duration-200"
+          onClick={handleProfileClick}
+        >
+          <div className="flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold shadow-lg">
+              {user?.name.charAt(0).toUpperCase()}
             </div>
+          </div>
+          {(isOpen || window.innerWidth < 768) && (
             <div className="overflow-hidden">
-              <p className="font-medium text-sm truncate">{user?.name}</p>
-              <p className="text-xs text-gray-500 truncate capitalize">{user?.role}</p>
+              <p className="font-semibold text-sm truncate text-gray-800">{user?.name}</p>
+              <p className="text-xs text-gray-600 truncate capitalize">{user?.role}</p>
             </div>
-          </div>
+          )}
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 };
 

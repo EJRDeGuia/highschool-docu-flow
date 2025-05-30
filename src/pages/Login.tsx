@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "../components/ui/label";
 import { Checkbox } from "../components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight, Loader, GraduationCap, Eye, EyeOff } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -42,7 +43,7 @@ const Login = () => {
       await login(email, password, rememberMe);
       
       toast({
-        title: "Success",
+        title: "Welcome back!",
         description: "You have successfully logged in",
       });
       navigate("/dashboard");
@@ -98,47 +99,74 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-school-background p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-school-primary">
-            School Document Request System
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Header */}
+        <div className="text-center mb-8 fade-in">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl shadow-lg">
+              <GraduationCap className="h-12 w-12 text-white" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gradient mb-2">
+            Pinagtongulan INHS
           </h1>
-          <p className="text-gray-600 mt-2">
-            Login to manage your document requests
+          <p className="text-gray-600 text-lg">
+            Document Request System
           </p>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Login</CardTitle>
-            <CardDescription>
-              Enter your credentials to access the system
+        {/* Login Card */}
+        <Card className="card-glass border-0 shadow-2xl">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-2xl font-bold text-gray-800">Welcome Back</CardTitle>
+            <CardDescription className="text-gray-600">
+              Sign in to access your document requests
             </CardDescription>
           </CardHeader>
+          
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@school.edu"
+                  placeholder="student@school.edu"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="input-glass h-12 text-gray-800 placeholder-gray-500"
                   required
                 />
               </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-glass h-12 text-gray-800 placeholder-gray-500 pr-12"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               
               <div className="flex items-center justify-between">
@@ -148,80 +176,90 @@ const Login = () => {
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                   />
-                  <Label htmlFor="remember" className="text-sm">
+                  <Label htmlFor="remember" className="text-sm text-gray-700">
                     Remember me
                   </Label>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-school-primary hover:underline"
+                  className="text-sm text-purple-600 hover:text-purple-800 font-medium"
                 >
                   Forgot password?
                 </button>
               </div>
               
-              <div className="text-sm text-muted-foreground">
-                <p>For demo purposes:</p>
-                <ul className="list-disc ml-5 mt-1 space-y-1">
-                  <li>Student: student@school.edu</li>
-                  <li>Registrar: registrar@school.edu</li>
-                  <li>Admin: admin@school.edu</li>
-                  <li>Password: password</li>
-                </ul>
+              {/* Demo Credentials */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                <p className="text-sm font-medium text-gray-700 mb-2">Demo Accounts:</p>
+                <div className="grid grid-cols-1 gap-1 text-xs text-gray-600">
+                  <div>👨‍🎓 Student: student@school.edu</div>
+                  <div>📋 Registrar: registrar@school.edu</div>
+                  <div>⚙️ Admin: admin@school.edu</div>
+                  <div className="font-medium mt-1">🔑 Password: password123</div>
+                </div>
               </div>
             </CardContent>
+            
             <CardFooter>
               <Button 
                 type="submit" 
-                className="w-full"
+                className="w-full btn-gradient h-12 text-base font-semibold"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
-                  <ArrowRight className="mr-2 h-4 w-4" />
+                  <ArrowRight className="mr-2 h-5 w-5" />
                 )}
-                Login
+                {isSubmitting ? "Signing in..." : "Sign In"}
               </Button>
             </CardFooter>
           </form>
         </Card>
 
+        {/* Footer */}
+        <div className="text-center mt-6 text-sm text-gray-600">
+          <p>Secure access to your academic documents</p>
+        </div>
+
         {/* Forgot Password Dialog */}
         <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
-          <DialogContent>
+          <DialogContent className="card-glass border-0">
             <DialogHeader>
-              <DialogTitle>Reset Password</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-gray-800">Reset Your Password</DialogTitle>
+              <DialogDescription className="text-gray-600">
                 Enter your email address and we'll send you a link to reset your password.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reset-email">Email</Label>
+                <Label htmlFor="reset-email" className="text-gray-700">Email Address</Label>
                 <Input
                   id="reset-email"
                   type="email"
-                  placeholder="you@school.edu"
+                  placeholder="student@school.edu"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
+                  className="input-glass h-12"
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2">
               <Button
                 variant="outline"
                 onClick={() => {
                   setShowForgotPassword(false);
                   setResetEmail("");
                 }}
+                className="btn-glass"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleForgotPassword}
                 disabled={isResettingPassword}
+                className="btn-gradient"
               >
                 {isResettingPassword ? (
                   <Loader className="mr-2 h-4 w-4 animate-spin" />

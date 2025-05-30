@@ -7,32 +7,32 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge = ({ status, className }: StatusBadgeProps) => {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusStyles = (status: string) => {
+    const normalizedStatus = status.toLowerCase();
+    
+    switch (normalizedStatus) {
       case 'pending':
-        return 'bg-yellow-50 text-yellow-800 border-yellow-200';
+        return 'status-pending';
       case 'processing':
-        return 'bg-blue-50 text-blue-800 border-blue-200';
+        return 'status-processing';
       case 'approved':
-        return 'bg-green-50 text-green-800 border-green-200';
+        return 'status-approved';
       case 'completed':
-        return 'bg-emerald-50 text-emerald-800 border-emerald-200';
+        return 'status-completed';
       case 'rejected':
-        return 'bg-red-50 text-red-800 border-red-200';
+        return 'status-rejected';
       case 'cancelled':
-        return 'bg-gray-50 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 border border-gray-300 font-medium px-3 py-1 rounded-full text-sm';
       default:
-        return 'bg-gray-50 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 border border-gray-300 font-medium px-3 py-1 rounded-full text-sm';
     }
   };
 
   return (
-    <Badge 
-      variant="outline" 
-      className={`${getStatusColor(status)} ${className || ''}`}
-    >
+    <span className={`${getStatusStyles(status)} inline-flex items-center ${className || ''}`}>
+      <span className="w-2 h-2 rounded-full bg-current opacity-60 mr-2"></span>
       {status}
-    </Badge>
+    </span>
   );
 };
 
