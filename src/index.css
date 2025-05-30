@@ -89,7 +89,7 @@
 
 @layer base {
   * {
-    @apply border-dotted;
+    @apply border-border;
   }
 
   body {
