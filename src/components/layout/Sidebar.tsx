@@ -96,19 +96,20 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   return (
     <aside 
       className={cn(
-        "fixed top-0 left-0 z-40 h-full transition-all duration-300 md:relative md:translate-x-0 sidebar-glass",
+        "fixed top-0 left-0 z-40 h-full transition-all duration-300 md:relative md:translate-x-0",
+        "bg-white/80 backdrop-blur-xl border-r border-gray-200/60 shadow-lg",
         isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 md:w-20"
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      <div className="flex items-center justify-between p-6 border-b border-gray-200/60">
         <div className={cn("flex items-center space-x-3", !isOpen && "md:justify-center")}>
-          <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-md">
+          <div className="p-2.5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-md">
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
           {(isOpen || window.innerWidth < 768) && (
             <div>
-              <h1 className="font-bold text-lg text-gradient">PINHS</h1>
+              <h1 className="font-bold text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">PINHS</h1>
               <p className="text-xs text-gray-500 font-medium">Document System</p>
             </div>
           )}
@@ -125,16 +126,16 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       </div>
       
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-2">
         {filteredNavItems.map((item) => (
           <Button
             key={item.href}
             variant="ghost"
             className={cn(
-              "sidebar-nav-item w-full justify-start text-sm font-medium transition-all duration-200 h-11 rounded-xl",
+              "w-full justify-start text-sm font-medium transition-all duration-200 h-12 rounded-xl",
               pathname === item.href 
-                ? "active shadow-sm" 
-                : "text-gray-600 hover:text-gray-900 hover:bg-white/50",
+                ? "bg-blue-50 text-blue-700 border-l-4 border-l-blue-500 shadow-sm font-semibold" 
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/60",
               !isOpen && "md:justify-center md:px-0"
             )}
             onClick={() => {
@@ -153,24 +154,22 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       </nav>
       
       {/* User Profile */}
-      <div className="p-3 border-t border-gray-100 mt-auto">
-        <div className="user-profile-section">
-          <div 
-            className="flex items-center space-x-3 cursor-pointer hover:bg-white/70 p-3 rounded-xl transition-all duration-200"
-            onClick={handleProfileClick}
-          >
-            <div className="flex-shrink-0">
-              <div className="h-9 w-9 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-md ring-2 ring-white">
-                {user?.name.charAt(0).toUpperCase()}
-              </div>
+      <div className="p-4 border-t border-gray-200/60 mt-auto">
+        <div 
+          className="flex items-center space-x-3 cursor-pointer hover:bg-gray-100/70 p-3 rounded-xl transition-all duration-200 bg-gray-50/50"
+          onClick={handleProfileClick}
+        >
+          <div className="flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-md ring-2 ring-white">
+              {user?.name.charAt(0).toUpperCase()}
             </div>
-            {(isOpen || window.innerWidth < 768) && (
-              <div className="overflow-hidden min-w-0">
-                <p className="font-semibold text-sm truncate text-gray-800">{user?.name}</p>
-                <p className="text-xs text-gray-500 truncate capitalize font-medium">{user?.role}</p>
-              </div>
-            )}
           </div>
+          {(isOpen || window.innerWidth < 768) && (
+            <div className="overflow-hidden min-w-0">
+              <p className="font-semibold text-sm truncate text-gray-800">{user?.name}</p>
+              <p className="text-xs text-gray-500 truncate capitalize font-medium">{user?.role}</p>
+            </div>
+          )}
         </div>
       </div>
     </aside>

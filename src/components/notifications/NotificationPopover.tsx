@@ -23,12 +23,12 @@ export const NotificationPopover = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative h-10 w-10 rounded-xl hover:bg-white/80 transition-all duration-200 border border-white/20 shadow-sm"
+          className="relative h-11 w-11 rounded-xl bg-white/70 hover:bg-white/90 transition-all duration-200 border border-gray-200/60 shadow-sm backdrop-blur-sm"
         >
           <Bell className="h-5 w-5 text-gray-700" />
           {unreadCount > 0 && (
             <Badge 
-              className="notification-badge absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold min-w-5"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold min-w-5 bg-red-500 hover:bg-red-500 border-2 border-white shadow-lg"
               variant="destructive"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
@@ -36,14 +36,14 @@ export const NotificationPopover = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 card-glass border-0 shadow-elevated" align="end">
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <h4 className="font-semibold text-gray-900">Notifications</h4>
+      <PopoverContent className="w-80 p-0 bg-white/95 backdrop-blur-xl border border-gray-200/60 shadow-xl rounded-xl" align="end">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100/80">
+          <h4 className="font-semibold text-gray-900 text-base">Notifications</h4>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-xs h-auto py-1 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md font-medium"
+              className="text-xs h-auto py-1.5 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg font-medium transition-colors"
               onClick={() => {
                 markAllAsRead();
               }}
@@ -58,8 +58,8 @@ export const NotificationPopover = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`notification-item p-4 cursor-pointer ${
-                    !notification.read ? 'notification-unread' : ''
+                  className={`p-4 cursor-pointer transition-all duration-200 hover:bg-gray-50/80 ${
+                    !notification.read ? 'bg-blue-50/50 border-l-4 border-l-blue-500' : ''
                   }`}
                   onClick={() => {
                     markAsRead(notification.id);
@@ -70,8 +70,8 @@ export const NotificationPopover = () => {
                 >
                   <div className="flex gap-3">
                     <div 
-                      className={`h-2 w-2 mt-2 rounded-full flex-shrink-0 ${
-                        notification.read ? 'bg-gray-200' : 'bg-blue-500 shadow-sm'
+                      className={`h-2 w-2 mt-2 rounded-full flex-shrink-0 transition-colors ${
+                        notification.read ? 'bg-gray-300' : 'bg-blue-500 shadow-sm'
                       }`} 
                     />
                     <div className="flex-1 min-w-0">

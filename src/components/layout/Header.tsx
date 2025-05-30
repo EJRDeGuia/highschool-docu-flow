@@ -43,30 +43,30 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
   };
 
   return (
-    <header className="dashboard-glass sticky top-0 z-30 flex items-center justify-between gap-4 shadow-sm">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-6 bg-white/70 backdrop-blur-xl border-b border-gray-200/60 shadow-sm px-6 py-4">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="text-gray-700 hover:bg-white/60 rounded-xl h-10 w-10 border border-white/20 shadow-sm transition-all duration-200"
+          className="text-gray-700 hover:bg-gray-100/80 rounded-xl h-11 w-11 border border-gray-200/60 shadow-sm transition-all duration-200 backdrop-blur-sm"
         >
           <Menu className="h-5 w-5" />
         </Button>
         
         <div className="hidden md:block">
-          <h2 className="font-semibold text-gray-900 text-lg">Welcome back, {user?.name?.split(' ')[0]}!</h2>
-          <p className="text-sm text-gray-600 font-medium">Here's what's happening with your documents today.</p>
+          <h2 className="font-semibold text-gray-900 text-xl">Welcome back, {user?.name?.split(' ')[0]}!</h2>
+          <p className="text-sm text-gray-600 font-medium mt-0.5">Here's what's happening with your documents today.</p>
         </div>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <NotificationPopover />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative flex items-center gap-3 p-2 px-3 hover:bg-white/60 rounded-xl border border-white/20 shadow-sm transition-all duration-200">
-              <Avatar className="h-9 w-9 border-2 border-white shadow-md ring-2 ring-white/50">
+            <Button variant="ghost" className="relative flex items-center gap-3 p-2 px-4 hover:bg-gray-100/80 rounded-xl border border-gray-200/60 shadow-sm transition-all duration-200 backdrop-blur-sm bg-white/70">
+              <Avatar className="h-9 w-9 border-2 border-white shadow-md ring-2 ring-gray-100">
                 <AvatarImage src={user?.avatar} />
                 <AvatarFallback className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-sm">
                   {user ? getInitials(user.name) : "U"}
@@ -78,7 +78,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 card-glass border-0 shadow-elevated">
+          <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-xl border border-gray-200/60 shadow-xl rounded-xl">
             <DropdownMenuLabel>
               <div>
                 <p className="font-semibold text-gray-900">{user?.name}</p>
@@ -86,14 +86,14 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-100" />
-            <DropdownMenuItem className="cursor-pointer hover:bg-blue-50 rounded-md font-medium" onClick={() => navigate("/dashboard/profile")}>
+            <DropdownMenuItem className="cursor-pointer hover:bg-blue-50 rounded-lg font-medium" onClick={() => navigate("/dashboard/profile")}>
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-blue-50 rounded-md font-medium" onClick={() => navigate("/dashboard/settings")}>
+            <DropdownMenuItem className="cursor-pointer hover:bg-blue-50 rounded-lg font-medium" onClick={() => navigate("/dashboard/settings")}>
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-100" />
-            <DropdownMenuItem className="cursor-pointer text-red-600 hover:bg-red-50 rounded-md font-medium" onClick={handleLogout}>
+            <DropdownMenuItem className="cursor-pointer text-red-600 hover:bg-red-50 rounded-lg font-medium" onClick={handleLogout}>
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

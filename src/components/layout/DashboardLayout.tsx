@@ -18,8 +18,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   // If loading, show loading spinner
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center card-glass p-12 max-w-sm mx-auto">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="flex flex-col items-center bg-white/80 backdrop-blur-xl p-12 max-w-sm mx-auto rounded-2xl shadow-xl border border-gray-200/60">
           <Loader className="h-12 w-12 animate-spin text-blue-600 mb-6" />
           <p className="text-gray-700 font-medium text-lg">Loading your dashboard...</p>
           <div className="mt-4 w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -57,8 +57,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto page-content">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto space-y-8">
             {children}
           </div>
         </main>
