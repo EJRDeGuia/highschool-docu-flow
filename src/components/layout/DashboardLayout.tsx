@@ -15,35 +15,37 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
-  // If loading, show loading spinner
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center space-y-4">
           <Loader className="h-12 w-12 animate-spin text-school-primary" />
-          <p className="mt-6 text-gray-600 font-medium">Loading your dashboard...</p>
+          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
   
-  // If not logged in, redirect to login
   if (!user) {
     navigate("/login");
     return null;
   }
   
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
-      <div className={`fixed md:static z-40 ${isSidebarOpen ? 'w-64' : 'w-0 md:w-20'} transition-all duration-300`}>
+    <div className="min-h-screen flex bg-gray-50">
+      <div className={`fixed md:static z-40 transition-all duration-300 ${
+        isSidebarOpen ? 'w-64' : 'w-0 md:w-20'
+      }`}>
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       </div>
       
-      <div className="flex-1 flex flex-col min-h-screen md:ml-0">
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         
-        <main className={`flex-1 p-5 md:p-8 overflow-y-auto transition-all duration-300 ${isSidebarOpen ? 'md:ml-0' : 'md:ml-0'}`}>
-          {children}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

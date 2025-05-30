@@ -1,24 +1,16 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { FilePlus, Loader, Search, SlidersHorizontal, Upload, X, Check } from "lucide-react";
-import { Input } from "../components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
+import { FilePlus, Loader } from "lucide-react";
 import { DocumentRequest, getUserRequests, cancelRequest } from "../services/requestService";
 import { useNavigate } from "react-router-dom";
-import RequestTimeline from "../components/requests/RequestTimeline";
-import StatusBadge from "../components/shared/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
+import RequestFilters from "../components/requests/RequestFilters";
+import RequestCard from "../components/requests/RequestCard";
+import RequestDetailsModal from "../components/requests/RequestDetailsModal";
+import EmptyRequestsState from "../components/requests/EmptyRequestsState";
 
 const MyRequests = () => {
   const { user } = useAuth();
@@ -87,14 +79,6 @@ const MyRequests = () => {
     setFilteredRequests(filtered);
   }, [requests, searchQuery, statusFilter, sortOrder]);
 
-  const handleRequestSelect = (request: DocumentRequest) => {
-    setSelectedRequest(request);
-  };
-
-  const closeRequestDetails = () => {
-    setSelectedRequest(null);
-  };
-
   const handleNewRequest = () => {
     navigate("/dashboard/new-request");
   };
@@ -145,7 +129,6 @@ const MyRequests = () => {
     }
   };
 
-  // Updated cancellation logic - only allow cancellation if not verified by registrar
   const canCancelRequest = (request: DocumentRequest) => {
     return request.status === 'Pending' && !request.hasPaid;
   };
@@ -163,45 +146,14 @@ const MyRequests = () => {
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search requests..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-4">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Status</SelectLabel>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Processing">Processing</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-                <SelectItem value="Cancelled">Cancelled</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant="outline"
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          >
-            <SlidersHorizontal className="mr-2 h-4 w-4" />
-            {sortOrder === "asc" ? "Oldest First" : "Newest First"}
-          </Button>
-        </div>
-      </div>
+      <RequestFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        sortOrder={sortOrder}
+        onSortOrderChange={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+      />
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
@@ -210,188 +162,34 @@ const MyRequests = () => {
       ) : filteredRequests.length > 0 ? (
         <div className="space-y-4">
           {filteredRequests.map((request) => (
-            <Card 
-              key={request.id} 
-              className="cursor-pointer hover:border-blue-500 transition-colors"
-              onClick={() => handleRequestSelect(request)}
-            >
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-lg">{request.documentTypeName}</p>
-                    <p className="text-sm text-gray-500">
-                      Request ID: {request.id}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {new Date(request.createdAt).toLocaleDateString()} - {request.purpose}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <StatusBadge status={request.status} />
-                    
-                    <div className="flex gap-2">
-                      {!request.hasUploadedReceipt && !request.hasPaid && request.status !== 'Cancelled' && (
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => handlePayNow(request.id, e)}>
-                          <Upload className="mr-1 h-3 w-3" />
-                          Pay Now
-                        </Button>
-                      )}
-                      
-                      {canCancelRequest(request) && (
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="text-xs h-7 text-red-600 hover:text-red-700 hover:bg-red-50" 
-                          onClick={(e) => handleCancelRequest(request.id, e)}
-                          disabled={cancellingRequestId === request.id}
-                        >
-                          {cancellingRequestId === request.id ? (
-                            <Loader className="mr-1 h-3 w-3 animate-spin" />
-                          ) : (
-                            <X className="mr-1 h-3 w-3" />
-                          )}
-                          Cancel
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <RequestCard
+              key={request.id}
+              request={request}
+              onSelect={setSelectedRequest}
+              onPayNow={handlePayNow}
+              onCancel={handleCancelRequest}
+              canCancel={canCancelRequest}
+              cancellingRequestId={cancellingRequestId}
+            />
           ))}
         </div>
       ) : (
-        <div className="bg-gray-50 border border-gray-100 rounded-lg p-8 text-center">
-          <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <FilePlus className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">No requests found</h3>
-          <p className="text-gray-500 mb-6">
-            {searchQuery || statusFilter !== "all"
-              ? "Try adjusting your search or filters"
-              : "You haven't made any document requests yet"}
-          </p>
-          <Button onClick={handleNewRequest}>
-            <FilePlus className="mr-2 h-4 w-4" />
-            Create New Request
-          </Button>
-        </div>
+        <EmptyRequestsState
+          searchQuery={searchQuery}
+          statusFilter={statusFilter}
+          onNewRequest={handleNewRequest}
+        />
       )}
 
-      {/* Request Details Modal */}
       {selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] overflow-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start">
-                <h2 className="text-2xl font-bold">{selectedRequest.documentTypeName}</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={closeRequestDetails}
-                >
-                  &times;
-                </Button>
-              </div>
-              
-              <div className="grid gap-6 mt-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Request ID</p>
-                    <p className="font-medium">{selectedRequest.id}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Status</p>
-                    <StatusBadge status={selectedRequest.status} className="mt-1" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Request Date</p>
-                    <p className="font-medium">
-                      {new Date(selectedRequest.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Last Updated</p>
-                    <p className="font-medium">
-                      {new Date(selectedRequest.updatedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Purpose</p>
-                    <p className="font-medium">{selectedRequest.purpose}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Copies</p>
-                    <p className="font-medium">{selectedRequest.copies}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Fee</p>
-                    <p className="font-medium">₱{selectedRequest.fee.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Payment Status</p>
-                    <p className="font-medium">
-                      {selectedRequest.hasPaid ? "Paid" : "Unpaid"}
-                    </p>
-                  </div>
-                </div>
-                
-                {selectedRequest.additionalDetails && (
-                  <div>
-                    <p className="text-sm text-gray-500">Additional Details</p>
-                    <p className="p-3 bg-gray-50 rounded-md mt-1">
-                      {selectedRequest.additionalDetails}
-                    </p>
-                  </div>
-                )}
-                
-                <div className="mt-4">
-                  <p className="text-sm text-gray-500 mb-2">Request Timeline</p>
-                  <RequestTimeline 
-                    requestId={selectedRequest.id}
-                    documentType={selectedRequest.documentTypeName}
-                    statuses={selectedRequest.timeline}
-                    currentStatus={selectedRequest.status}
-                  />
-                </div>
-                
-                <div className="flex justify-end gap-3 mt-4">
-                  {!selectedRequest.hasUploadedReceipt && !selectedRequest.hasPaid && selectedRequest.status !== 'Cancelled' && (
-                    <Button 
-                      onClick={() => handlePayNow(selectedRequest.id)}
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Pay Now
-                    </Button>
-                  )}
-                  
-                  {canCancelRequest(selectedRequest) && (
-                    <Button 
-                      variant="outline"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleCancelRequest(selectedRequest.id)}
-                      disabled={cancellingRequestId === selectedRequest.id}
-                    >
-                      {cancellingRequestId === selectedRequest.id ? (
-                        <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <X className="mr-2 h-4 w-4" />
-                      )}
-                      Cancel Request
-                    </Button>
-                  )}
-                  
-                  <Button
-                    variant="outline"
-                    onClick={closeRequestDetails}
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <RequestDetailsModal
+          request={selectedRequest}
+          onClose={() => setSelectedRequest(null)}
+          onPayNow={handlePayNow}
+          onCancel={handleCancelRequest}
+          canCancel={canCancelRequest}
+          cancellingRequestId={cancellingRequestId}
+        />
       )}
     </DashboardLayout>
   );

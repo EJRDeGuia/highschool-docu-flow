@@ -1,38 +1,12 @@
-import { User } from "../contexts/AuthContext";
+
 import { supabase } from "@/integrations/supabase/client";
-
-export interface DocumentRequest {
-  id: string;
-  userId: string;
-  documentType: string;
-  documentTypeName: string;
-  purpose: string;
-  additionalDetails?: string;
-  copies: number;
-  status: RequestStatus;
-  createdAt: string;
-  updatedAt: string;
-  fee: number;
-  hasPaid: boolean;
-  hasUploadedReceipt: boolean;
-  timeline: RequestTimelineItem[];
-}
-
-export type RequestStatus = 
-  | 'Pending' 
-  | 'Processing' 
-  | 'Approved' 
-  | 'Rejected' 
-  | 'Completed' 
-  | 'Cancelled';
-
-export interface RequestTimelineItem {
-  id: string;
-  step: string;
-  status: 'completed' | 'current' | 'pending';
-  date?: string;
-  note?: string;
-}
+import { DocumentRequest, RequestStatus } from "./requestTypes";
+import { 
+  fetchDocumentTypes, 
+  fetchTimelineItems, 
+  transformToDocumentRequest,
+  addTimelineItem 
+} from "./requestHelpers";
 
 // Get all requests (for admin/registrar)
 export const getAllRequests = async (): Promise<DocumentRequest[]> => {
@@ -59,68 +33,22 @@ export const getAllRequests = async (): Promise<DocumentRequest[]> => {
     return [];
   }
 
-  // Fetch document types for each request
-  const { data: documentTypes, error: documentTypesError } = await supabase
-    .from('document_types')
-    .select('*');
-
-  if (documentTypesError) {
-    console.error('Error fetching document types:', documentTypesError);
-    return [];
-  }
-
-  // Create a map of document type IDs to document type objects
-  const documentTypeMap = (documentTypes || []).reduce((acc, docType) => {
+  const documentTypes = await fetchDocumentTypes();
+  const documentTypeMap = documentTypes.reduce((acc, docType) => {
     acc[docType.id] = docType;
     return acc;
   }, {} as Record<string, any>);
 
-  // Fetch timeline items for all requests
-  const { data: timelineItems, error: timelineError } = await supabase
-    .from('request_timeline')
-    .select('*')
-    .order('date', { ascending: true });
+  const requestIds = (requestsData || []).map(req => req.id);
+  const timelineMap = await fetchTimelineItems(requestIds);
 
-  if (timelineError) {
-    console.error('Error fetching timeline items:', timelineError);
-    return [];
-  }
-
-  // Create a map of request IDs to timeline items
-  const timelineMap = (timelineItems || []).reduce((acc, item) => {
-    if (!acc[item.request_id]) {
-      acc[item.request_id] = [];
-    }
-    acc[item.request_id].push({
-      id: item.id,
-      step: item.step,
-      status: item.status as 'completed' | 'current' | 'pending',
-      date: item.date,
-      note: item.note
-    });
-    return acc;
-  }, {} as Record<string, RequestTimelineItem[]>);
-
-  // Transform database results to DocumentRequest objects
   return (requestsData || []).map(req => {
     const docType = documentTypeMap[req.document_type_id] || {};
-    
-    return {
-      id: req.id,
-      userId: req.user_id,
-      documentType: req.document_type_id,
-      documentTypeName: docType.name || 'Unknown Document Type',
-      purpose: req.purpose,
-      additionalDetails: req.additional_details,
-      copies: req.copies,
-      status: req.status as RequestStatus,
-      createdAt: req.created_at,
-      updatedAt: req.updated_at,
-      fee: req.fee,
-      hasPaid: req.has_paid,
-      hasUploadedReceipt: req.has_uploaded_receipt,
-      timeline: timelineMap[req.id] || []
-    };
+    return transformToDocumentRequest(
+      req,
+      docType.name || 'Unknown Document Type',
+      timelineMap[req.id] || []
+    );
   });
 };
 
@@ -150,69 +78,22 @@ export const getUserRequests = async (userId: string): Promise<DocumentRequest[]
     return [];
   }
 
-  // Fetch document types for each request
-  const { data: documentTypes, error: documentTypesError } = await supabase
-    .from('document_types')
-    .select('*');
-
-  if (documentTypesError) {
-    console.error('Error fetching document types:', documentTypesError);
-    return [];
-  }
-
-  // Create a map of document type IDs to document type objects
-  const documentTypeMap = (documentTypes || []).reduce((acc, docType) => {
+  const documentTypes = await fetchDocumentTypes();
+  const documentTypeMap = documentTypes.reduce((acc, docType) => {
     acc[docType.id] = docType;
     return acc;
   }, {} as Record<string, any>);
 
-  // Fetch timeline items for these requests
   const requestIds = (requestsData || []).map(req => req.id);
-  const { data: timelineItems, error: timelineError } = await supabase
-    .from('request_timeline')
-    .select('*')
-    .in('request_id', requestIds)
-    .order('date', { ascending: true });
+  const timelineMap = await fetchTimelineItems(requestIds);
 
-  if (timelineError && requestIds.length > 0) {
-    console.error('Error fetching timeline items:', timelineError);
-  }
-
-  // Create a map of request IDs to timeline items
-  const timelineMap = (timelineItems || []).reduce((acc, item) => {
-    if (!acc[item.request_id]) {
-      acc[item.request_id] = [];
-    }
-    acc[item.request_id].push({
-      id: item.id,
-      step: item.step,
-      status: item.status as 'completed' | 'current' | 'pending',
-      date: item.date,
-      note: item.note
-    });
-    return acc;
-  }, {} as Record<string, RequestTimelineItem[]>);
-
-  // Transform database results to DocumentRequest objects
   return (requestsData || []).map(req => {
     const docType = documentTypeMap[req.document_type_id] || {};
-    
-    return {
-      id: req.id,
-      userId: req.user_id,
-      documentType: req.document_type_id,
-      documentTypeName: docType.name || 'Unknown Document Type',
-      purpose: req.purpose,
-      additionalDetails: req.additional_details,
-      copies: req.copies,
-      status: req.status as RequestStatus,
-      createdAt: req.created_at,
-      updatedAt: req.updated_at,
-      fee: req.fee,
-      hasPaid: req.has_paid,
-      hasUploadedReceipt: req.has_uploaded_receipt,
-      timeline: timelineMap[req.id] || []
-    };
+    return transformToDocumentRequest(
+      req,
+      docType.name || 'Unknown Document Type',
+      timelineMap[req.id] || []
+    );
   });
 };
 
@@ -241,64 +122,23 @@ export const getRequestById = async (requestId: string): Promise<DocumentRequest
         has_uploaded_receipt
       `)
       .eq('id', requestId)
-      .maybeSingle(); // Use maybeSingle instead of single to prevent error when no rows found
+      .maybeSingle();
 
-    if (requestError) {
+    if (requestError || !request) {
       console.error('Error fetching request:', requestError);
       return undefined;
     }
 
-    // If no request was found, return undefined
-    if (!request) {
-      console.error('No request found with ID:', requestId);
-      return undefined;
-    }
+    const documentTypes = await fetchDocumentTypes();
+    const docType = documentTypes.find(dt => dt.id === request.document_type_id);
 
-    // Fetch document type
-    const { data: docType, error: docTypeError } = await supabase
-      .from('document_types')
-      .select('*')
-      .eq('id', request.document_type_id)
-      .maybeSingle(); // Use maybeSingle here too
+    const timelineMap = await fetchTimelineItems([requestId]);
 
-    if (docTypeError) {
-      console.error('Error fetching document type:', docTypeError);
-    }
-
-    // Fetch timeline items
-    const { data: timeline, error: timelineError } = await supabase
-      .from('request_timeline')
-      .select('*')
-      .eq('request_id', requestId)
-      .order('date', { ascending: true });
-
-    if (timelineError) {
-      console.error('Error fetching timeline items:', timelineError);
-    }
-
-    // Transform to DocumentRequest
-    return {
-      id: request.id,
-      userId: request.user_id,
-      documentType: request.document_type_id,
-      documentTypeName: docType?.name || 'Unknown Document Type',
-      purpose: request.purpose,
-      additionalDetails: request.additional_details,
-      copies: request.copies,
-      status: request.status as RequestStatus,
-      createdAt: request.created_at,
-      updatedAt: request.updated_at,
-      fee: request.fee,
-      hasPaid: request.has_paid,
-      hasUploadedReceipt: request.has_uploaded_receipt,
-      timeline: (timeline || []).map(item => ({
-        id: item.id,
-        step: item.step,
-        status: item.status as 'completed' | 'current' | 'pending',
-        date: item.date,
-        note: item.note
-      }))
-    };
+    return transformToDocumentRequest(
+      request,
+      docType?.name || 'Unknown Document Type',
+      timelineMap[requestId] || []
+    );
   } catch (error) {
     console.error('Unexpected error fetching request:', error);
     return undefined;
@@ -311,34 +151,17 @@ export const updateRequestStatus = async (
   status: RequestStatus,
   note?: string
 ): Promise<DocumentRequest | undefined> => {
-  // Update request status
-  const { data: updatedRequest, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from('document_requests')
     .update({ status })
-    .eq('id', requestId)
-    .select()
-    .single();
+    .eq('id', requestId);
 
   if (updateError) {
     console.error('Error updating request status:', updateError);
     return undefined;
   }
 
-  // Add timeline item
-  const { error: timelineError } = await supabase
-    .from('request_timeline')
-    .insert({
-      request_id: requestId,
-      step: `Status changed to ${status}`,
-      status: 'completed' as 'completed',
-      note: note
-    });
-
-  if (timelineError) {
-    console.error('Error adding timeline item:', timelineError);
-  }
-
-  // Fetch the updated request with timeline
+  await addTimelineItem(requestId, `Status changed to ${status}`, 'completed', note);
   return await getRequestById(requestId);
 };
 
@@ -352,7 +175,6 @@ export const createRequest = async (
   additionalDetails?: string,
   fee?: number
 ): Promise<DocumentRequest> => {
-  // Calculate fee if not provided
   let calculatedFee = fee;
   if (!calculatedFee) {
     const { data: docType } = await supabase
@@ -364,7 +186,6 @@ export const createRequest = async (
     calculatedFee = (docType?.base_fee || 50) * copies;
   }
 
-  // Insert new request
   const { data: newRequest, error: requestError } = await supabase
     .from('document_requests')
     .insert({
@@ -385,205 +206,54 @@ export const createRequest = async (
     throw new Error('Failed to create request');
   }
 
-  // Add initial timeline item
-  const { error: timelineError } = await supabase
-    .from('request_timeline')
-    .insert({
-      request_id: newRequest.id,
-      step: 'Request Submitted',
-      status: 'completed' as 'completed'
-    });
+  await addTimelineItem(newRequest.id, 'Request Submitted', 'completed');
 
-  if (timelineError) {
-    console.error('Error adding timeline item:', timelineError);
-  }
-
-  return {
-    id: newRequest.id,
-    userId: newRequest.user_id,
-    documentType: newRequest.document_type_id,
+  return transformToDocumentRequest(
+    newRequest,
     documentTypeName,
-    purpose: newRequest.purpose,
-    additionalDetails: newRequest.additional_details,
-    copies: newRequest.copies,
-    status: newRequest.status as RequestStatus,
-    createdAt: newRequest.created_at,
-    updatedAt: newRequest.updated_at,
-    fee: newRequest.fee,
-    hasPaid: newRequest.has_paid,
-    hasUploadedReceipt: newRequest.has_uploaded_receipt,
-    timeline: [{
-      id: timelineError ? '1' : 'pending',
+    [{
+      id: 'initial',
       step: 'Request Submitted',
-      status: 'current' as 'current',
+      status: 'current',
       date: new Date().toISOString()
     }]
-  };
+  );
 };
 
 // Mark request as paid
 export const markRequestAsPaid = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  // Update request
-  const { data: updatedRequest, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from('document_requests')
     .update({ has_paid: true })
-    .eq('id', requestId)
-    .select()
-    .single();
+    .eq('id', requestId);
 
   if (updateError) {
     console.error('Error marking request as paid:', updateError);
     return undefined;
   }
 
-  // Add timeline item
-  const { error: timelineError } = await supabase
-    .from('request_timeline')
-    .insert({
-      request_id: requestId,
-      step: 'Payment Received',
-      status: 'completed' as 'completed'
-    });
-
-  if (timelineError) {
-    console.error('Error adding timeline item:', timelineError);
-  }
-
-  // Fetch the updated request with timeline
+  await addTimelineItem(requestId, 'Payment Received', 'completed');
   return await getRequestById(requestId);
 };
 
 // Mark receipt as uploaded
 export const markReceiptUploaded = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  // Update request
-  const { data: updatedRequest, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from('document_requests')
     .update({ has_uploaded_receipt: true })
-    .eq('id', requestId)
-    .select()
-    .single();
+    .eq('id', requestId);
 
   if (updateError) {
     console.error('Error marking receipt as uploaded:', updateError);
     return undefined;
   }
 
-  // Add timeline item
-  const { error: timelineError } = await supabase
-    .from('request_timeline')
-    .insert({
-      request_id: requestId,
-      step: 'Receipt Uploaded',
-      status: 'completed' as 'completed'
-    });
-
-  if (timelineError) {
-    console.error('Error adding timeline item:', timelineError);
-  }
-
-  // Fetch the updated request with timeline
+  await addTimelineItem(requestId, 'Receipt Uploaded', 'completed');
   return await getRequestById(requestId);
 };
 
-// Upload receipt file
-export const uploadReceipt = async (requestId: string, file: File): Promise<boolean> => {
-  // Note: Actual file upload functionality would go here
-  // For this demo, we're just simulating the upload success
-  const success = await markReceiptUploaded(requestId);
-  return success !== undefined;
-};
-
-// Search requests
-export const searchRequests = async (query: string): Promise<DocumentRequest[]> => {
-  // This is a simplified search that looks at purpose field only
-  // In a real implementation, you might want to search multiple fields
-  const { data: requestsData, error: requestsError } = await supabase
-    .from('document_requests')
-    .select(`
-      id,
-      user_id,
-      document_type_id,
-      purpose,
-      additional_details,
-      copies,
-      status,
-      created_at,
-      updated_at,
-      fee,
-      has_paid,
-      has_uploaded_receipt
-    `)
-    .ilike('purpose', `%${query}%`)
-    .order('created_at', { ascending: false });
-
-  if (requestsError) {
-    console.error('Error searching requests:', requestsError);
-    return [];
-  }
-
-  // Follow the same pattern as getAllRequests to get document types and timeline items
-  // (simplified for brevity - full implementation would mirror getAllRequests)
-
-  return (requestsData || []).map(req => ({
-    id: req.id,
-    userId: req.user_id,
-    documentType: req.document_type_id,
-    documentTypeName: 'Unknown Document Type', // Would fetch in full implementation
-    purpose: req.purpose,
-    additionalDetails: req.additional_details,
-    copies: req.copies,
-    status: req.status as RequestStatus,
-    createdAt: req.created_at,
-    updatedAt: req.updated_at,
-    fee: req.fee,
-    hasPaid: req.has_paid,
-    hasUploadedReceipt: req.has_uploaded_receipt,
-    timeline: [] // Would fetch in full implementation
-  }));
-};
-
-// Get statistics for dashboard
-export const getRequestStatistics = async (): Promise<{
-  total: number;
-  pending: number;
-  processing: number;
-  approved: number;
-  completed: number;
-  rejected: number;
-}> => {
-  // Get counts by status
-  const { data, error } = await supabase
-    .from('document_requests')
-    .select('status', { count: 'exact' });
-
-  if (error) {
-    console.error('Error fetching request statistics:', error);
-    return {
-      total: 0,
-      pending: 0,
-      processing: 0,
-      approved: 0,
-      completed: 0,
-      rejected: 0,
-    };
-  }
-
-  // Count requests by status
-  const stats = {
-    total: data.length,
-    pending: data.filter(r => r.status === 'Pending').length,
-    processing: data.filter(r => r.status === 'Processing').length,
-    approved: data.filter(r => r.status === 'Approved').length,
-    completed: data.filter(r => r.status === 'Completed').length,
-    rejected: data.filter(r => r.status === 'Rejected').length,
-  };
-
-  return stats;
-};
-
-// Cancel request (only allowed before receipt upload)
+// Cancel request
 export const cancelRequest = async (requestId: string): Promise<DocumentRequest | undefined> => {
-  // First check if the request exists and is cancellable
   const request = await getRequestById(requestId);
   if (!request) {
     throw new Error("Request not found");
@@ -597,33 +267,19 @@ export const cancelRequest = async (requestId: string): Promise<DocumentRequest 
     throw new Error("Can only cancel requests that are pending");
   }
 
-  // Update request status to cancelled
-  const { data: updatedRequest, error: updateError } = await supabase
+  const { error: updateError } = await supabase
     .from('document_requests')
     .update({ status: 'Cancelled' })
-    .eq('id', requestId)
-    .select()
-    .single();
+    .eq('id', requestId);
 
   if (updateError) {
     console.error('Error cancelling request:', updateError);
     throw new Error('Failed to cancel request');
   }
 
-  // Add timeline item
-  const { error: timelineError } = await supabase
-    .from('request_timeline')
-    .insert({
-      request_id: requestId,
-      step: 'Request Cancelled',
-      status: 'completed' as 'completed',
-      note: 'Request cancelled by student'
-    });
-
-  if (timelineError) {
-    console.error('Error adding timeline item:', timelineError);
-  }
-
-  // Fetch the updated request with timeline
+  await addTimelineItem(requestId, 'Request Cancelled', 'completed', 'Request cancelled by student');
   return await getRequestById(requestId);
 };
+
+// Export types for backward compatibility
+export type { DocumentRequest, RequestStatus, RequestTimelineItem } from './requestTypes';
