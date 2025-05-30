@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { DocumentRequest, RequestStatus } from "./requestTypes";
+import { DocumentRequest, RequestStatus, RequestStatistics } from "./requestTypes";
 import { 
   fetchDocumentTypes, 
   fetchTimelineItems, 
@@ -88,6 +88,148 @@ export const getUserRequests = async (userId: string): Promise<DocumentRequest[]
   const timelineMap = await fetchTimelineItems(requestIds);
 
   return (requestsData || []).map(req => {
+    const docType = documentTypeMap[req.document_type_id] || {};
+    return transformToDocumentRequest(
+      req,
+      docType.name || 'Unknown Document Type',
+      timelineMap[req.id] || []
+    );
+  });
+};
+
+// Get request statistics
+export const getRequestStatistics = async (): Promise<RequestStatistics> => {
+  const { data: requestsData, error } = await supabase
+    .from('document_requests')
+    .select('status');
+
+  if (error) {
+    console.error('Error fetching request statistics:', error);
+    return {
+      total: 0,
+      pending: 0,
+      processing: 0,
+      approved: 0,
+      completed: 0,
+      rejected: 0
+    };
+  }
+
+  const stats = (requestsData || []).reduce((acc, request) => {
+    acc.total++;
+    
+    switch (request.status) {
+      case 'Pending':
+        acc.pending++;
+        break;
+      case 'Processing':
+        acc.processing++;
+        break;
+      case 'Approved':
+        acc.approved++;
+        break;
+      case 'Completed':
+        acc.completed++;
+        break;
+      case 'Rejected':
+      case 'Cancelled':
+        acc.rejected++;
+        break;
+    }
+    
+    return acc;
+  }, {
+    total: 0,
+    pending: 0,
+    processing: 0,
+    approved: 0,
+    completed: 0,
+    rejected: 0
+  });
+
+  return stats;
+};
+
+// Search requests
+export const searchRequests = async (query: string): Promise<DocumentRequest[]> => {
+  if (!query.trim()) {
+    return [];
+  }
+
+  const searchTerm = `%${query.trim().toLowerCase()}%`;
+
+  const { data: requestsData, error: requestsError } = await supabase
+    .from('document_requests')
+    .select(`
+      id,
+      user_id,
+      document_type_id,
+      purpose,
+      additional_details,
+      copies,
+      status,
+      created_at,
+      updated_at,
+      fee,
+      has_paid,
+      has_uploaded_receipt
+    `)
+    .or(`id.ilike.${searchTerm},user_id.ilike.${searchTerm},purpose.ilike.${searchTerm},status.ilike.${searchTerm}`)
+    .order('created_at', { ascending: false });
+
+  if (requestsError) {
+    console.error('Error searching requests:', requestsError);
+    return [];
+  }
+
+  const documentTypes = await fetchDocumentTypes();
+  const documentTypeMap = documentTypes.reduce((acc, docType) => {
+    acc[docType.id] = docType;
+    return acc;
+  }, {} as Record<string, any>);
+
+  // Also search by document type name
+  const matchingDocTypes = documentTypes.filter(docType => 
+    docType.name.toLowerCase().includes(query.toLowerCase())
+  );
+  
+  let additionalRequests: any[] = [];
+  if (matchingDocTypes.length > 0) {
+    const docTypeIds = matchingDocTypes.map(dt => dt.id);
+    const { data: additionalData } = await supabase
+      .from('document_requests')
+      .select(`
+        id,
+        user_id,
+        document_type_id,
+        purpose,
+        additional_details,
+        copies,
+        status,
+        created_at,
+        updated_at,
+        fee,
+        has_paid,
+        has_uploaded_receipt
+      `)
+      .in('document_type_id', docTypeIds);
+    
+    additionalRequests = additionalData || [];
+  }
+
+  // Combine and deduplicate results
+  const allRequests = [...(requestsData || []), ...additionalRequests];
+  const uniqueRequests = allRequests.reduce((acc, request) => {
+    if (!acc.find(r => r.id === request.id)) {
+      acc.push(request);
+    }
+    return acc;
+  }, [] as any[]);
+
+  const requestIds = uniqueRequests.map(req => req.id);
+  const timelineMap = await fetchTimelineItems(requestIds);
+
+  return uniqueRequests.map(req => {
     const docType = documentTypeMap[req.document_type_id] || {};
     return transformToDocumentRequest(
       req,
