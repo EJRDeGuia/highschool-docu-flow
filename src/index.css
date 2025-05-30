@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -156,8 +157,9 @@
   
   /* Animation for loading shimmer effect */
   .shimmer {
-    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent bg-no-repeat animate-shimmer;
+    @apply bg-gradient-to-r from-transparent via-white to-transparent bg-no-repeat animate-shimmer;
     background-size: 1000px 100%;
+    opacity: 0.2;
   }
 
   /* Improved text gradient */
@@ -177,12 +179,13 @@
 
   /* Glassmorphism effect */
   .glass {
-    @apply bg-white/80 backdrop-blur-lg border border-gray-200 rounded-lg;
+    @apply bg-white backdrop-blur-lg border border-gray-200 rounded-lg;
+    background-color: rgba(255, 255, 255, 0.8);
   }
 
   /* Enhanced shadows */
   .shadow-soft {
-    @apply shadow-[0_4px_20px_rgba(0,0,0,0.05)];
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   }
 }
 
