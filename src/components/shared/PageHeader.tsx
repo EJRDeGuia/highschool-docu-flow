@@ -16,20 +16,24 @@ interface PageHeaderProps {
 
 const PageHeader = ({ title, description, action, className }: PageHeaderProps) => {
   return (
-    <div className={cn("flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8", className)}>
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gradient">{title}</h1>
-        {description && <p className="text-gray-600 max-w-2xl">{description}</p>}
+    <div className={cn("flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8", className)}>
+      <div className="space-y-2">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gradient leading-tight">{title}</h1>
+        {description && (
+          <p className="text-gray-600 text-lg max-w-2xl leading-relaxed">{description}</p>
+        )}
       </div>
       
       {action && (
-        <Button 
-          onClick={action.onClick}
-          className="shrink-0 bg-gradient-to-r from-school-primary to-school-secondary hover:from-school-secondary hover:to-school-primary text-white shadow-md transition-all duration-200"
-        >
-          {action.icon && <span className="mr-2">{action.icon}</span>}
-          {action.label}
-        </Button>
+        <div className="flex-shrink-0">
+          <Button 
+            onClick={action.onClick}
+            className="btn-gradient h-12 px-6 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            {action.icon && <span className="mr-2">{action.icon}</span>}
+            {action.label}
+          </Button>
+        </div>
       )}
     </div>
   );
