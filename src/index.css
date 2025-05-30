@@ -89,28 +89,28 @@
 
 @layer base {
   * {
-    @apply border-dotted;
+    @apply border-border;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-gray-900 font-semibold tracking-tight;
+    @apply text-foreground font-semibold tracking-tight;
   }
   
   /* Improved focus styles */
   *:focus-visible {
-    @apply outline-none ring-2 ring-blue-600 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
   }
 }
 
 @layer components {
   /* Status badges */
   .status-pending {
-    @apply bg-amber-50 text-amber-600 border border-amber-200 font-medium;
+    @apply bg-yellow-50 text-yellow-600 border border-yellow-200 font-medium;
   }
 
   .status-approved {
@@ -131,11 +131,11 @@
   
   /* Card and layout components */
   .card-shadow {
-    @apply shadow-md border border-gray-100 bg-white rounded-lg transition-all duration-300;
+    @apply shadow-md border border-border bg-card rounded-lg transition-all duration-300;
   }
   
   .card-hover {
-    @apply hover:shadow-lg hover:border-blue-300 transition-all duration-200;
+    @apply hover:shadow-lg hover:border-primary/30 transition-all duration-200;
   }
   
   .dashboard-card {
@@ -152,7 +152,7 @@
   }
   
   .input-label {
-    @apply block text-sm font-medium text-gray-700;
+    @apply block text-sm font-medium text-foreground;
   }
   
   /* Animation for loading shimmer effect */
@@ -163,12 +163,12 @@
 
   /* Improved text gradient */
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent;
   }
 
   /* Button styles */
   .btn-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white shadow-md transition-all duration-200;
+    @apply bg-gradient-to-r from-primary to-blue-500 hover:from-blue-500 hover:to-primary text-primary-foreground shadow-md transition-all duration-200;
   }
 
   /* Card styles */
@@ -178,7 +178,7 @@
 
   /* Glassmorphism effect */
   .glass {
-    @apply bg-white/80 backdrop-blur-lg border border-white/20 rounded-lg;
+    @apply bg-background/80 backdrop-blur-lg border border-border rounded-lg;
   }
 
   /* Enhanced shadows */
@@ -196,7 +196,7 @@
   
   /* Text styles */
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent;
   }
   
   /* Card effects */
