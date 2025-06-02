@@ -95,7 +95,8 @@ const RequestDetailsModal = ({
             </div>
             
             <div className="flex justify-end gap-3 mt-4">
-              {!request.hasUploadedReceipt && !request.hasPaid && request.status !== 'Cancelled' && (
+              {!request.hasUploadedReceipt && !request.hasPaid && 
+               request.status !== 'Cancelled' && request.status !== 'Rejected' && (
                 <Button onClick={() => onPayNow(request.id)}>
                   <Upload className="mr-2 h-4 w-4" />
                   Pay Now

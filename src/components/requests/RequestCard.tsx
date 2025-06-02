@@ -42,7 +42,8 @@ const RequestCard = ({
             <StatusBadge status={request.status} />
             
             <div className="flex gap-2">
-              {!request.hasUploadedReceipt && !request.hasPaid && request.status !== 'Cancelled' && (
+              {!request.hasUploadedReceipt && !request.hasPaid && 
+               request.status !== 'Cancelled' && request.status !== 'Rejected' && (
                 <Button size="sm" variant="outline" className="text-xs h-7" onClick={(e) => onPayNow(request.id, e)}>
                   <Upload className="mr-1 h-3 w-3" />
                   Pay Now
