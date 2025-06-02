@@ -34,33 +34,42 @@ export const createUserSpecificNotification = (
   });
 };
 
-// Predefined notification templates for common scenarios
+// Updated notification templates for better role-specific messaging
 export const NotificationTemplates = {
-  requestSubmitted: (studentName: string, documentType: string) => ({
-    title: 'New Request Submitted',
-    message: `${studentName} has submitted a request for ${documentType}`,
+  // For students when they submit a request
+  requestSubmittedStudent: (documentType: string) => ({
+    title: 'Request Submitted Successfully',
+    message: `Your request for ${documentType} has been submitted and is pending approval.`,
+    targetRoles: ['student'] as UserRole[],
+    type: 'success' as const,
+  }),
+
+  // For staff when a student submits a request
+  requestSubmittedStaff: (studentName: string, documentType: string, copies: number) => ({
+    title: 'New Document Request',
+    message: `${studentName} has submitted a request for ${documentType} (${copies} ${copies === 1 ? 'copy' : 'copies'}).`,
     targetRoles: ['registrar', 'admin'] as UserRole[],
     type: 'info' as const,
   }),
   
   requestApproved: (documentType: string) => ({
     title: 'Request Approved',
-    message: `Your request for ${documentType} has been approved`,
+    message: `Your request for ${documentType} has been approved and is being processed.`,
     targetRoles: ['student'] as UserRole[],
     type: 'success' as const,
   }),
   
   requestRejected: (documentType: string, reason?: string) => ({
     title: 'Request Rejected',
-    message: `Your request for ${documentType} has been rejected${reason ? `: ${reason}` : ''}`,
+    message: `Your request for ${documentType} has been rejected${reason ? `: ${reason}` : ''}.`,
     targetRoles: ['student'] as UserRole[],
     type: 'error' as const,
   }),
 
   requestCancelled: (studentName: string, documentType: string) => ({
     title: 'Request Cancelled',
-    message: `${studentName} has cancelled their request for ${documentType}`,
-    targetRoles: ['student', 'registrar', 'admin'] as UserRole[],
+    message: `${studentName} has cancelled their request for ${documentType}.`,
+    targetRoles: ['registrar', 'admin'] as UserRole[],
     type: 'warning' as const,
   }),
   
@@ -72,9 +81,16 @@ export const NotificationTemplates = {
   }),
   
   receiptUploaded: (studentName: string, documentType: string) => ({
-    title: 'Receipt Uploaded',
-    message: `${studentName} has uploaded a payment receipt for ${documentType}`,
+    title: 'Payment Receipt Uploaded',
+    message: `${studentName} has uploaded a payment receipt for ${documentType}.`,
     targetRoles: ['registrar', 'admin'] as UserRole[],
     type: 'info' as const,
+  }),
+
+  documentReady: (documentType: string) => ({
+    title: 'Document Ready for Pickup',
+    message: `Your ${documentType} is ready for pickup at the registrar's office.`,
+    targetRoles: ['student'] as UserRole[],
+    type: 'success' as const,
   }),
 };

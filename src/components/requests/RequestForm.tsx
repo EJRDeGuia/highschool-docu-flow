@@ -114,11 +114,21 @@ const RequestForm = () => {
       // Store the created request ID
       setCreatedRequestId(newRequest.id);
 
-      // Add notification
+      // Add notification for the student who submitted the request
       addNotification({
-        title: "Request Submitted",
-        message: `Your ${docType.name} request has been submitted successfully.`,
-        type: "success"
+        title: "Request Submitted Successfully",
+        message: `Your request for ${docType.name} has been submitted and is pending approval.`,
+        type: "success",
+        targetRoles: ["student"],
+        userId: user.id
+      });
+
+      // Add notification for registrar and admin about the new request
+      addNotification({
+        title: "New Document Request",
+        message: `${user.name} has submitted a request for ${docType.name} (${values.copies} ${values.copies === 1 ? 'copy' : 'copies'}).`,
+        type: "info",
+        targetRoles: ["registrar", "admin"]
       });
       
       toast({
