@@ -9,7 +9,7 @@ import {
 } from "../ui/popover";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
-import { NotificationsProvider, useNotifications } from "../../contexts/NotificationsContext";
+import { useNotifications } from "../../contexts/NotificationsContext";
 
 export const NotificationPopover = () => {
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
