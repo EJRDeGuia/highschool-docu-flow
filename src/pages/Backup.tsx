@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define the backup history item type to ensure type safety
 type BackupHistoryItemType = {
@@ -85,31 +87,23 @@ const Backup = () => {
   const [isRestoreInProgress, setIsRestoreInProgress] = useState(false);
   const [backupProgress, setBackupProgress] = useState(0);
   const [restoreProgress, setRestoreProgress] = useState(0);
-  const [backupHistory, setBackupHistory] = useState<BackupHistoryItemType[]>([
-    {
-      id: '1',
-      date: '2023-05-20 10:15 AM',
-      size: '2.3 MB',
-      status: 'success',
-      type: 'backup',
-    },
-    {
-      id: '2',
-      date: '2023-05-15 09:30 AM',
-      size: '2.1 MB',
-      status: 'success',
-      type: 'backup',
-    },
-    {
-      id: '3',
-      date: '2023-05-10 14:45 PM',
-      size: '1.9 MB',
-      status: 'success',
-      type: 'backup',
-    },
-  ]);
+  const [backupHistory, setBackupHistory] = useState<BackupHistoryItemType[]>([]);
+  const [backupData, setBackupData] = useState<any>(null);
 
-  const handleBackup = () => {
+  // Load backup history on component mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('backup_history');
+    if (savedHistory) {
+      setBackupHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  const saveBackupHistory = (history: BackupHistoryItemType[]) => {
+    localStorage.setItem('backup_history', JSON.stringify(history));
+    setBackupHistory(history);
+  };
+
+  const handleBackup = async () => {
     if (isBackupInProgress || isRestoreInProgress) {
       toast({
         title: "Operation in Progress",
@@ -122,38 +116,96 @@ const Backup = () => {
     setIsBackupInProgress(true);
     setBackupProgress(0);
     
-    // Simulate backup progress
-    const interval = setInterval(() => {
-      setBackupProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsBackupInProgress(false);
-          
-          // Add backup to history
-          const newBackup: BackupHistoryItemType = {
-            id: Math.random().toString(36).substring(2, 15),
-            date: new Date().toLocaleString(),
-            size: '2.5 MB',
-            status: 'success',
-            type: 'backup',
-          };
-          
-          setBackupHistory([newBackup, ...backupHistory]);
-          
-          // Show success message
-          toast({
-            title: "Backup Completed",
-            description: "Database backup has been successfully completed.",
-          });
-          
-          return 100;
+    try {
+      // Simulate progress while we fetch data
+      const progressInterval = setInterval(() => {
+        setBackupProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      // Fetch all data from tables
+      const [usersData, documentTypesData, documentRequestsData, receiptUploadsData, requestTimelineData] = await Promise.all([
+        supabase.from('users').select('*'),
+        supabase.from('document_types').select('*'),
+        supabase.from('document_requests').select('*'),
+        supabase.from('receipt_uploads').select('*'),
+        supabase.from('request_timeline').select('*'),
+      ]);
+
+      clearInterval(progressInterval);
+
+      if (usersData.error || documentTypesData.error || documentRequestsData.error || 
+          receiptUploadsData.error || requestTimelineData.error) {
+        throw new Error('Failed to fetch data from database');
+      }
+
+      const backup = {
+        timestamp: new Date().toISOString(),
+        data: {
+          users: usersData.data,
+          document_types: documentTypesData.data,
+          document_requests: documentRequestsData.data,
+          receipt_uploads: receiptUploadsData.data,
+          request_timeline: requestTimelineData.data,
         }
-        return prev + 10;
+      };
+
+      // Store backup data in localStorage
+      const backupKey = `backup_${Date.now()}`;
+      localStorage.setItem(backupKey, JSON.stringify(backup));
+      
+      // Calculate size
+      const backupSize = (JSON.stringify(backup).length / 1024).toFixed(1) + ' KB';
+      
+      setBackupProgress(100);
+      
+      // Add backup to history
+      const newBackup: BackupHistoryItemType = {
+        id: backupKey,
+        date: new Date().toLocaleString(),
+        size: backupSize,
+        status: 'success',
+        type: 'backup',
+      };
+      
+      const updatedHistory = [newBackup, ...backupHistory];
+      saveBackupHistory(updatedHistory);
+      
+      toast({
+        title: "Backup Completed",
+        description: "Database backup has been successfully completed.",
       });
-    }, 500);
+      
+    } catch (error) {
+      console.error('Backup error:', error);
+      
+      const newBackup: BackupHistoryItemType = {
+        id: Math.random().toString(36).substring(2, 15),
+        date: new Date().toLocaleString(),
+        size: '0 KB',
+        status: 'failed',
+        type: 'backup',
+      };
+      
+      const updatedHistory = [newBackup, ...backupHistory];
+      saveBackupHistory(updatedHistory);
+      
+      toast({
+        title: "Backup Failed",
+        description: "Failed to create database backup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBackupInProgress(false);
+    }
   };
 
-  const handleRestore = () => {
+  const handleRestore = async () => {
     if (isBackupInProgress || isRestoreInProgress) {
       toast({
         title: "Operation in Progress",
@@ -163,43 +215,109 @@ const Backup = () => {
       return;
     }
     
+    // Get the latest backup
+    const latestBackup = backupHistory.find(item => item.type === 'backup' && item.status === 'success');
+    if (!latestBackup) {
+      toast({
+        title: "No Backup Available",
+        description: "No successful backup found to restore from.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Confirm before restoration
-    if (!window.confirm("Are you sure you want to restore the database? This will overwrite current data.")) {
+    if (!window.confirm("Are you sure you want to restore the database? This will overwrite current data except for users.")) {
       return;
     }
     
     setIsRestoreInProgress(true);
     setRestoreProgress(0);
     
-    // Simulate restore progress
-    const interval = setInterval(() => {
-      setRestoreProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsRestoreInProgress(false);
-          
-          // Add restore to history
-          const newRestore: BackupHistoryItemType = {
-            id: Math.random().toString(36).substring(2, 15),
-            date: new Date().toLocaleString(),
-            size: '2.5 MB',
-            status: 'success',
-            type: 'restore',
-          };
-          
-          setBackupHistory([newRestore, ...backupHistory]);
-          
-          // Show success message
-          toast({
-            title: "Restore Completed",
-            description: "Database has been successfully restored.",
-          });
-          
-          return 100;
-        }
-        return prev + 8;
+    try {
+      // Get backup data
+      const backupData = localStorage.getItem(latestBackup.id);
+      if (!backupData) {
+        throw new Error('Backup data not found');
+      }
+      
+      const backup = JSON.parse(backupData);
+      
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setRestoreProgress(prev => {
+          if (prev >= 80) {
+            clearInterval(progressInterval);
+            return 80;
+          }
+          return prev + 10;
+        });
+      }, 300);
+      
+      // Clear existing data (except users) and restore
+      await Promise.all([
+        supabase.from('request_timeline').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('receipt_uploads').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('document_requests').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('document_types').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      ]);
+      
+      // Restore data (skip users to preserve existing users)
+      if (backup.data.document_types?.length > 0) {
+        await supabase.from('document_types').insert(backup.data.document_types);
+      }
+      if (backup.data.document_requests?.length > 0) {
+        await supabase.from('document_requests').insert(backup.data.document_requests);
+      }
+      if (backup.data.receipt_uploads?.length > 0) {
+        await supabase.from('receipt_uploads').insert(backup.data.receipt_uploads);
+      }
+      if (backup.data.request_timeline?.length > 0) {
+        await supabase.from('request_timeline').insert(backup.data.request_timeline);
+      }
+      
+      clearInterval(progressInterval);
+      setRestoreProgress(100);
+      
+      // Add restore to history
+      const newRestore: BackupHistoryItemType = {
+        id: Math.random().toString(36).substring(2, 15),
+        date: new Date().toLocaleString(),
+        size: latestBackup.size,
+        status: 'success',
+        type: 'restore',
+      };
+      
+      const updatedHistory = [newRestore, ...backupHistory];
+      saveBackupHistory(updatedHistory);
+      
+      toast({
+        title: "Restore Completed",
+        description: "Database has been successfully restored from backup.",
       });
-    }, 600);
+      
+    } catch (error) {
+      console.error('Restore error:', error);
+      
+      const newRestore: BackupHistoryItemType = {
+        id: Math.random().toString(36).substring(2, 15),
+        date: new Date().toLocaleString(),
+        size: '0 KB',
+        status: 'failed',
+        type: 'restore',
+      };
+      
+      const updatedHistory = [newRestore, ...backupHistory];
+      saveBackupHistory(updatedHistory);
+      
+      toast({
+        title: "Restore Failed",
+        description: "Failed to restore database from backup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRestoreInProgress(false);
+    }
   };
 
   return (
@@ -260,7 +378,7 @@ const Backup = () => {
                 <div className="flex items-center gap-3">
                   <Clock className="h-5 w-5 text-gray-500" />
                   <p className="text-sm text-gray-500">
-                    Last backup: {backupHistory[0]?.date || "Never"}
+                    Last backup: {backupHistory.find(item => item.type === 'backup')?.date || "Never"}
                   </p>
                 </div>
               </div>
@@ -322,21 +440,21 @@ const Backup = () => {
                   <div>
                     <p className="font-medium">Warning</p>
                     <p className="text-sm">
-                      Restoring the database will overwrite all current data. 
+                      Restoring the database will overwrite current data (except users). 
                       Make sure to create a backup before proceeding.
                     </p>
                   </div>
                 </div>
                 <div className="p-4 border border-gray-200 rounded-md">
                   <p className="font-medium mb-2">Available Backups</p>
-                  {backupHistory.filter(item => item.type === 'backup').length > 0 ? (
+                  {backupHistory.filter(item => item.type === 'backup' && item.status === 'success').length > 0 ? (
                     <div className="text-sm">
                       <div className="flex justify-between text-gray-500 mb-1">
                         <span>Date</span>
                         <span>Size</span>
                       </div>
                       {backupHistory
-                        .filter(item => item.type === 'backup')
+                        .filter(item => item.type === 'backup' && item.status === 'success')
                         .slice(0, 3)
                         .map((backup, index) => (
                           <div key={backup.id} className="flex justify-between py-1 border-t border-gray-100">
@@ -356,7 +474,7 @@ const Backup = () => {
             <Button
               variant="outline"
               onClick={handleRestore}
-              disabled={isBackupInProgress || isRestoreInProgress || backupHistory.filter(item => item.type === 'backup').length === 0}
+              disabled={isBackupInProgress || isRestoreInProgress || backupHistory.filter(item => item.type === 'backup' && item.status === 'success').length === 0}
               className="w-full"
             >
               {isRestoreInProgress ? (
