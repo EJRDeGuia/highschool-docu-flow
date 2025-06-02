@@ -6,7 +6,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import PageHeader from "../components/shared/PageHeader";
 import StatusBadge from "../components/shared/StatusBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { ClipboardList, FileCheck, FileClock, FileX, Loader, ArrowRight, Clock } from "lucide-react";
+import { ClipboardList, FileCheck, FileClock, FileX, Loader, ArrowRight, Clock, Upload } from "lucide-react";
 import { getRequestStatistics, getUserRequests } from "../services/requestService";
 
 const Dashboard = () => {
@@ -67,6 +67,11 @@ const Dashboard = () => {
       return "Oversee the document request system and user management.";
     }
   };
+
+  const handleUploadReceipt = () => {
+    navigate("/dashboard/my-requests?filter=needsReceipt");
+  };
+
   return <DashboardLayout>
       <div className="max-w-7xl mx-auto">
         <PageHeader
@@ -187,10 +192,9 @@ const Dashboard = () => {
                   />
                   <ActionCard
                     title="Upload Receipt"
-                    description="Upload a payment receipt"
-                    link="/dashboard/upload-receipt"
-                    icon={<FileCheck className="h-5 w-5" />}
-                    navigate={navigate}
+                    description="Upload receipts for pending requests"
+                    onClick={handleUploadReceipt}
+                    icon={<Upload className="h-5 w-5" />}
                   />
                 </div>
               </CardContent>
@@ -270,19 +274,28 @@ const DashboardCard = ({
     </Card>;
 };
 
-// Action Card Component - Updated to use navigation
+// Action Card Component - Updated to support both navigation and click handlers
 interface ActionCardProps {
   title: string;
   description: string;
-  link: string;
+  link?: string;
+  onClick?: () => void;
   icon: React.ReactNode;
-  navigate: (path: string) => void;
+  navigate?: (path: string) => void;
 }
 
-const ActionCard = ({ title, description, link, icon, navigate }: ActionCardProps) => {
+const ActionCard = ({ title, description, link, onClick, icon, navigate }: ActionCardProps) => {
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else if (link && navigate) {
+      navigate(link);
+    }
+  };
+
   return (
     <button
-      onClick={() => navigate(link)}
+      onClick={handleClick}
       className="group block p-5 rounded-lg border border-gray-100 hover:bg-gray-50 transition-all duration-200 hover:shadow-md text-left w-full"
     >
       <div className="flex items-center gap-4">

@@ -49,6 +49,7 @@ const RequestFilters = ({
             <SelectGroup>
               <SelectLabel>Status</SelectLabel>
               <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="needsReceipt">Needs Receipt</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
               <SelectItem value="Processing">Processing</SelectItem>
               <SelectItem value="Approved">Approved</SelectItem>

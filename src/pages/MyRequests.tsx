@@ -5,7 +5,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 import { Button } from "../components/ui/button";
 import { FilePlus, Loader } from "lucide-react";
 import { DocumentRequest, getUserRequests, cancelRequest } from "../services/requestService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import RequestFilters from "../components/requests/RequestFilters";
 import RequestCard from "../components/requests/RequestCard";
@@ -16,6 +16,7 @@ const MyRequests = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [requests, setRequests] = useState<DocumentRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<DocumentRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,12 +50,26 @@ const MyRequests = () => {
     fetchRequests();
   }, [user?.id, toast]);
 
+  // Check for filter parameter from URL
+  useEffect(() => {
+    const filterParam = searchParams.get('filter');
+    if (filterParam === 'needsReceipt') {
+      setStatusFilter('needsReceipt');
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     // Apply filters and search
     let filtered = [...requests];
     
     // Apply status filter
-    if (statusFilter !== "all") {
+    if (statusFilter === 'needsReceipt') {
+      // Filter for requests that need receipts (approved but not paid and no receipt uploaded)
+      filtered = filtered.filter(request => 
+        !request.hasUploadedReceipt && !request.hasPaid && 
+        (request.status === 'Pending' || request.status === 'Approved')
+      );
+    } else if (statusFilter !== "all") {
       filtered = filtered.filter(request => request.status === statusFilter);
     }
     
@@ -133,12 +148,26 @@ const MyRequests = () => {
     return request.status === 'Pending' && !request.hasPaid;
   };
 
+  const getPageTitle = () => {
+    if (statusFilter === 'needsReceipt') {
+      return 'Upload Receipt';
+    }
+    return 'My Requests';
+  };
+
+  const getPageDescription = () => {
+    if (statusFilter === 'needsReceipt') {
+      return 'Upload payment receipts for your pending requests';
+    }
+    return 'View and track all your document requests';
+  };
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold">My Requests</h1>
-          <p className="text-gray-600">View and track all your document requests</p>
+          <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
+          <p className="text-gray-600">{getPageDescription()}</p>
         </div>
         <Button onClick={handleNewRequest}>
           <FilePlus className="mr-2 h-4 w-4" />
