@@ -1,4 +1,3 @@
-
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth, UserRole } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
@@ -79,7 +78,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       name: "Settings",
       href: "/dashboard/settings",
       icon: Settings,
-      roles: ["admin"], // Restrict Settings to admin only
+      roles: ["admin"], // Settings only for admin users
     },
   ];
   
