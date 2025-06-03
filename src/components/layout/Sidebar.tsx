@@ -74,15 +74,16 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       icon: Database,
       roles: ["admin"],
     },
-    {
+    // Only include Settings for admin users
+    ...(user?.role === "admin" ? [{
       name: "Settings",
       href: "/dashboard/settings",
       icon: Settings,
-      roles: ["admin"], // Settings only for admin users
-    },
+      roles: ["admin"] as UserRole[],
+    }] : []),
   ];
   
-  // Filter nav items based on user role
+  // Filter nav items based on user role - this should now be redundant but kept for safety
   const filteredNavItems = user?.role 
     ? navItems.filter(item => item.roles.includes(user.role as UserRole))
     : [];
