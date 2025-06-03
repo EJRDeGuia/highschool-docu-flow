@@ -721,38 +721,6 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="font-medium">MySQL Connection Settings</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="db-host">Database Host</Label>
-                    <Input id="db-host" defaultValue="localhost" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="db-port">Database Port</Label>
-                    <Input id="db-port" defaultValue="3306" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="db-name">Database Name</Label>
-                    <Input id="db-name" defaultValue="document_system" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="db-user">Database User</Label>
-                    <Input id="db-user" defaultValue="document_user" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="db-password">Database Password</Label>
-                    <Input id="db-password" type="password" defaultValue="password" />
-                  </div>
-                </div>
-              </div>
             </CardContent>
             <CardFooter>
               <Button 
